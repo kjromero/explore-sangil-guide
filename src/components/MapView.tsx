@@ -7,7 +7,7 @@ import mockData from '@/data/mockData.json';
 
 // You'll need to add your Mapbox token here
 // For now, using a placeholder - user will need to provide their token
-const MAPBOX_TOKEN = 'your-mapbox-token-here';
+const MAPBOX_TOKEN = 'sk.eyJ1Ijoia2pyb21lcm8xIiwiYSI6ImNtZWpleHhwYzBkbGUycnE4Yndya3ZucXYifQ.o5-OfhpNMJ-X6P8DJrL0yw';
 
 interface MapViewProps {
   activeCategory: Category;
@@ -32,7 +32,7 @@ export function MapView({ activeCategory, onLocationSelect }: MapViewProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<mapboxgl.Marker[]>([]);
-  const [showTokenInput, setShowTokenInput] = useState(!MAPBOX_TOKEN || MAPBOX_TOKEN === 'your-mapbox-token-here');
+  const [showTokenInput, setShowTokenInput] = useState(!MAPBOX_TOKEN);
   const [userToken, setUserToken] = useState('');
 
   const allLocations: Location[] = [
