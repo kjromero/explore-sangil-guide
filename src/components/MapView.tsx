@@ -139,47 +139,6 @@ export function MapView({ activeCategory, onLocationSelect }: MapViewProps) {
     });
   };
 
-  if (showTokenInput) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-gradient-hero">
-        <div className="bg-card p-8 rounded-lg shadow-elegant max-w-md w-full mx-4">
-          <h3 className="text-xl font-semibold mb-4">Mapbox Token Required</h3>
-          <p className="text-muted-foreground mb-4">
-            To display the interactive map, please enter your Mapbox public token. 
-            You can get one free at{' '}
-            <a 
-              href="https://mapbox.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-primary hover:underline"
-            >
-              mapbox.com
-            </a>
-          </p>
-          <div className="space-y-4">
-            <input
-              type="text"
-              placeholder="pk.eyJ1IjoieW91cm..."
-              value={userToken}
-              onChange={(e) => setUserToken(e.target.value)}
-              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-            <button
-              onClick={() => {
-                if (userToken.trim()) {
-                  setShowTokenInput(false);
-                }
-              }}
-              disabled={!userToken.trim()}
-              className="w-full bg-primary text-primary-foreground py-2 rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Load Map
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="relative h-screen pt-16">
