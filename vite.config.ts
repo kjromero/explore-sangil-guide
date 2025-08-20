@@ -20,5 +20,4 @@ export default defineConfig(({ mode }) => ({
     },
   },
   base: "/explore-sangil-guide/",
-
 }));
