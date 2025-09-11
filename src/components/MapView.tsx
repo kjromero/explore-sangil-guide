@@ -7,7 +7,7 @@ import mockData from '@/data/mockData.json';
 
 // You'll need to add your Mapbox token here
 // For now, using a placeholder - user will need to provide their token
-const MAPBOX_TOKEN = 'sk.eyJ1Ijoia2pyb21lcm8xIiwiYSI6ImNtZWpleHhwYzBkbGUycnE4Yndya3ZucXYifQ.o5-OfhpNMJ-X6P8DJrL0yw';
+const MAPBOX_TOKEN = 'pk.eyJ1Ijoia2pyb21lcm8xIiwiYSI6ImNtZWpldjl5YjBjeHAybXE4a2JxeG14am8ifQ.gVSUiqu0uC3nAWXoYXRr7A';
 
 interface MapViewProps {
   activeCategory: Category;
