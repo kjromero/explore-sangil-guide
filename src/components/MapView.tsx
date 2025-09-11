@@ -4,6 +4,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import type { Category } from './FilterBar';
 import type { Location } from '@/types';
 import mockData from '@/data/mockData.json';
+import { SUBCATEGORIES } from '@/config/subcategories';
 
 // You'll need to add your Mapbox token here
 // For now, using a placeholder - user will need to provide their token
@@ -140,20 +141,60 @@ export function MapView({ activeCategory, activeSubcategory, onLocationSelect }:
       <div ref={mapContainer} className="absolute inset-0" />
       
       {/* Category Legend */}
-      <div className="absolute bottom-4 left-4 bg-card/95 backdrop-blur-sm rounded-lg p-4 shadow-elegant">
-        <h4 className="font-semibold mb-2 text-sm">Categorías</h4>
+      <div className="absolute bottom-4 left-4 bg-card/95 backdrop-blur-sm rounded-lg p-4 shadow-elegant max-h-64 overflow-y-auto">
+        <h4 className="font-semibold mb-2 text-sm">
+          {activeSubcategory ? 'Subcategoría' : activeCategory === 'todo' ? 'Categorías' : 'Categoría'}
+        </h4>
         <div className="space-y-2">
-          {Object.entries(categoryIcons).map(([category, icon]) => (
-            <div key={category} className="flex items-center space-x-2 text-sm">
+          {activeSubcategory ? (
+            // Show active subcategory
+            <div className="flex items-center space-x-2 text-sm">
               <div 
                 className="w-4 h-4 rounded-full flex items-center justify-center text-xs"
-                style={{ backgroundColor: categoryColors[category as keyof typeof categoryColors] }}
+                style={{ backgroundColor: categoryColors[activeCategory as keyof typeof categoryColors] }}
               >
-                {icon}
+                {categoryIcons[activeCategory as keyof typeof categoryIcons]}
               </div>
-              <span className="capitalize">{category}</span>
+              <span className="font-medium">{activeSubcategory}</span>
             </div>
-          ))}
+          ) : activeCategory === 'todo' ? (
+            // Show all categories when "Todo" is selected
+            Object.entries(categoryIcons).map(([category, icon]) => (
+              <div key={category} className="flex items-center space-x-2 text-sm">
+                <div 
+                  className="w-4 h-4 rounded-full flex items-center justify-center text-xs"
+                  style={{ backgroundColor: categoryColors[category as keyof typeof categoryColors] }}
+                >
+                  {icon}
+                </div>
+                <span className="capitalize">{category}</span>
+              </div>
+            ))
+          ) : (
+            // Show category and its subcategories when a specific category is selected
+            <>
+              <div className="flex items-center space-x-2 text-sm">
+                <div 
+                  className="w-4 h-4 rounded-full flex items-center justify-center text-xs"
+                  style={{ backgroundColor: categoryColors[activeCategory as keyof typeof categoryColors] }}
+                >
+                  {categoryIcons[activeCategory as keyof typeof categoryIcons]}
+                </div>
+                <span className="font-medium capitalize">{activeCategory}</span>
+              </div>
+              {SUBCATEGORIES[activeCategory].map((subcategory) => (
+                <div key={subcategory} className="flex items-center space-x-2 text-sm ml-6">
+                  <div 
+                    className="w-3 h-3 rounded-full flex items-center justify-center text-xs"
+                    style={{ backgroundColor: categoryColors[activeCategory as keyof typeof categoryColors] }}
+                  >
+                    <span className="text-[8px]">•</span>
+                  </div>
+                  <span className="text-muted-foreground">{subcategory}</span>
+                </div>
+              ))}
+            </>
+          )}
         </div>
       </div>
     </div>
