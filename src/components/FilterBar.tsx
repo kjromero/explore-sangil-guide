@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { UtensilsCrossed, Mountain, Landmark, ShoppingBag, Menu } from "lucide-react";
 
-export type Category = 'all' | 'gastronomy' | 'adventure' | 'culture' | 'shops';
+export type Category = 'todo' | 'gastronomía' | 'aventura' | 'cultura' | 'tiendas';
 
 interface FilterBarProps {
   activeCategory: Category;
@@ -10,11 +10,11 @@ interface FilterBarProps {
 }
 
 const categories = [
-  { id: 'all' as Category, label: 'All', icon: Menu },
-  { id: 'gastronomy' as Category, label: 'Food', icon: UtensilsCrossed },
-  { id: 'adventure' as Category, label: 'Adventure', icon: Mountain },
-  { id: 'culture' as Category, label: 'Culture', icon: Landmark },
-  { id: 'shops' as Category, label: 'Shops', icon: ShoppingBag },
+  { id: 'todo' as Category, label: 'Todo', icon: Menu },
+  { id: 'gastronomía' as Category, label: 'Gastronomía', icon: UtensilsCrossed },
+  { id: 'aventura' as Category, label: 'Aventura', icon: Mountain },
+  { id: 'cultura' as Category, label: 'Cultura', icon: Landmark },
+  { id: 'tiendas' as Category, label: 'Tiendas', icon: ShoppingBag },
 ];
 
 export function FilterBar({ activeCategory, onCategoryChange, onMenuToggle }: FilterBarProps) {
@@ -33,7 +33,7 @@ export function FilterBar({ activeCategory, onCategoryChange, onMenuToggle }: Fi
             </Button>
             
             <h2 className="text-lg font-semibold text-foreground">
-              San Gil Explorer
+              Explorador San Gil
             </h2>
           </div>
           

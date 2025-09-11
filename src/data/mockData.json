@@ -3,24 +3,24 @@
     {
       "id": 1,
       "name": "Restaurante Jenny",
-      "description": "Authentic Santanderean cuisine featuring traditional dishes like cabrito, mute, and fresh river fish in a cozy family atmosphere.",
+      "description": "Auténtica comida santandereana con platos tradicionales como cabrito, mute y pescado fresco de río en un ambiente familiar acogedor.",
       "address": "Calle 10 #5-20, San Gil",
       "photo": "restaurant-jenny.jpg",
       "mapsUrl": "https://maps.google.com/?q=6.556,-73.133",
       "bookingUrl": "https://reservations.mock/jenny",
-      "tags": ["family-friendly", "local food", "traditional"],
-      "category": "gastronomy",
+      "tags": ["familiar", "comida local", "tradicional"],
+      "category": "gastronomía",
       "coordinates": [4.9176418,-74.1122502]
     },
     {
       "id": 2,
       "name": "Café del Río",
-      "description": "Specialty coffee shop with locally grown beans and homemade pastries. Perfect spot to relax after adventure activities.",
+      "description": "Cafetería especializada con granos cultivados localmente y pasteles caseros. Lugar perfecto para relajarse después de actividades de aventura.",
       "address": "Carrera 9 #8-15, San Gil",
       "photo": "restaurant-jenny.jpg",
       "mapsUrl": "https://maps.google.com/?q=6.558,-73.135",
-      "tags": ["coffee", "pastries", "relaxing"],
-      "category": "gastronomy",
+      "tags": ["café", "pasteles", "relajante"],
+      "category": "gastronomía",
       "coordinates": [4.9176418,-74.1122502]
     }
   ],
@@ -28,23 +28,23 @@
     {
       "id": 1,
       "name": "Cueva del Indio",
-      "description": "Historic limestone cave system with ancient indigenous petroglyphs and guided tours through stunning rock formations.",
+      "description": "Sistema histórico de cuevas de piedra caliza con antiguos petroglifos indígenas y visitas guiadas a través de impresionantes formaciones rocosas.",
       "address": "Vereda Curití, San Gil",
       "photo": "cueva-del-indio.jpg",
       "mapsUrl": "https://maps.google.com/?q=6.559,-73.140",
-      "tags": ["heritage", "guided tours", "nature"],
-      "category": "culture",
+      "tags": ["patrimonio", "visitas guiadas", "naturaleza"],
+      "category": "cultura",
       "coordinates": [4.9176418,-74.1122502]
     },
     {
       "id": 2,
       "name": "Catedral de San Gil",
-      "description": "Beautiful colonial cathedral dating back to the 18th century, featuring stunning architecture and religious art.",
+      "description": "Hermosa catedral colonial que data del siglo XVIII, con impresionante arquitectura y arte religioso.",
       "address": "Parque Principal, San Gil",
       "photo": "cueva-del-indio.jpg",
       "mapsUrl": "https://maps.google.com/?q=6.554,-73.134",
-      "tags": ["colonial", "architecture", "religious"],
-      "category": "culture",
+      "tags": ["colonial", "arquitectura", "religioso"],
+      "category": "cultura",
       "coordinates": [4.9176418,-74.1122502]
     }
   ],
@@ -52,25 +52,25 @@
     {
       "id": 1,
       "name": "Paragliding San Gil",
-      "description": "Tandem paragliding experience over the stunning Chicamocha Canyon with certified instructors and breathtaking views.",
+      "description": "Experiencia de parapente en tándem sobre el impresionante Cañón del Chicamocha con instructores certificados y vistas impresionantes.",
       "address": "Mesa de Los Santos, San Gil",
       "photo": "paragliding.jpg",
       "mapsUrl": "https://maps.google.com/?q=6.560,-73.135",
       "bookingUrl": "https://adventure.mock/paragliding",
-      "tags": ["adrenaline", "adults", "scenic views"],
-      "category": "adventure",
+      "tags": ["adrenalina", "adultos", "vistas panorámicas"],
+      "category": "aventura",
       "coordinates": [4.9176418,-74.1122502]
     },
     {
       "id": 2,
       "name": "Rafting Río Suarez",
-      "description": "Exciting white water rafting adventure through Class II-III rapids with professional guides and safety equipment included.",
+      "description": "Emocionante aventura de rafting en aguas blancas a través de rápidos Clase II-III con guías profesionales y equipo de seguridad incluido.",
       "address": "Puerto Bogotá, San Gil",
       "photo": "paragliding.jpg",
       "mapsUrl": "https://maps.google.com/?q=6.545,-73.120",
       "bookingUrl": "https://adventure.mock/rafting",
-      "tags": ["water sports", "adrenaline", "groups"],
-      "category": "adventure",
+      "tags": ["deportes acuáticos", "adrenalina", "grupos"],
+      "category": "aventura",
       "coordinates": [4.9176418,-74.1122502]
     }
   ],
@@ -78,39 +78,39 @@
     {
       "id": 1,
       "name": "FixMyPhone",
-      "description": "Professional phone and electronic device repair services with genuine parts and quick turnaround times.",
+      "description": "Servicios profesionales de reparación de teléfonos y dispositivos electrónicos con piezas genuinas y tiempos de entrega rápidos.",
       "address": "Carrera 8 #7-12, San Gil",
       "photo": "phone-repair.jpg",
       "mapsUrl": "https://maps.google.com/?q=6.553,-73.137",
-      "tags": ["services", "electronics", "repair"],
-      "category": "shops",
+      "tags": ["servicios", "electrónica", "reparación"],
+      "category": "tiendas",
       "coordinates": [4.9176418,-74.1122502]
     },
     {
       "id": 2,
       "name": "Artesanías del Fonce",
-      "description": "Traditional handicrafts and souvenirs made by local artisans, including woven textiles and pottery.",
+      "description": "Artesanías y souvenirs tradicionales hechos por artesanos locales, incluyendo textiles tejidos y cerámica.",
       "address": "Calle 12 #9-8, San Gil",
       "photo": "phone-repair.jpg",
       "mapsUrl": "https://maps.google.com/?q=6.555,-73.132",
-      "tags": ["handicrafts", "souvenirs", "local art"],
-      "category": "shops",
+      "tags": ["artesanías", "souvenirs", "arte local"],
+      "category": "tiendas",
       "coordinates": [4.9176418,-74.1122502]
     }
   ],
   "shop_products": [
     {
       "id": 1,
-      "name": "San Gil Adventure T-Shirt",
-      "description": "Premium cotton t-shirt featuring San Gil's iconic landscape and adventure sports graphics.",
+      "name": "Camiseta de Aventura San Gil",
+      "description": "Camiseta de algodón premium con el paisaje icónico de San Gil y gráficos de deportes de aventura.",
       "price": "$25.000 COP",
       "image": "tshirt-mockup.jpg",
       "instagramUrl": "https://instagram.com/sangiltourism"
     },
     {
       "id": 2,
-      "name": "Chicamocha Canyon Hoodie",
-      "description": "Comfortable hoodie with stunning canyon artwork and San Gil branding.",
+      "name": "Sudadera Cañón del Chicamocha",
+      "description": "Sudadera cómoda con impresionante diseño del cañón y marca de San Gil.",
       "price": "$45.000 COP",
       "image": "tshirt-mockup.jpg",
       "instagramUrl": "https://instagram.com/sangiltourism"

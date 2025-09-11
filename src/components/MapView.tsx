@@ -15,17 +15,17 @@ interface MapViewProps {
 }
 
 const categoryIcons = {
-  gastronomy: '🍽️',
-  adventure: '🏔️',
-  culture: '🏛️',
-  shops: '🛍️',
+  'gastronomía': '🍽️',
+  'aventura': '🏔️',
+  'cultura': '🏛️',
+  'tiendas': '🛍️',
 };
 
 const categoryColors = {
-  gastronomy: '#f59e0b',
-  adventure: '#10b981',
-  culture: '#8b5cf6',
-  shops: '#3b82f6',
+  'gastronomía': '#f59e0b',
+  'aventura': '#10b981',
+  'cultura': '#8b5cf6',
+  'tiendas': '#3b82f6',
 };
 
 export function MapView({ activeCategory, onLocationSelect }: MapViewProps) {
@@ -146,7 +146,7 @@ export function MapView({ activeCategory, onLocationSelect }: MapViewProps) {
       
       {/* Category Legend */}
       <div className="absolute bottom-4 left-4 bg-card/95 backdrop-blur-sm rounded-lg p-4 shadow-elegant">
-        <h4 className="font-semibold mb-2 text-sm">Categories</h4>
+        <h4 className="font-semibold mb-2 text-sm">Categorías</h4>
         <div className="space-y-2">
           {Object.entries(categoryIcons).map(([category, icon]) => (
             <div key={category} className="flex items-center space-x-2 text-sm">

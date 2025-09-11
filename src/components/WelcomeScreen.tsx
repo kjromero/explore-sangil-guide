@@ -21,15 +21,15 @@ export function WelcomeScreen({ onExplore }: WelcomeScreenProps) {
       <div className="relative z-10 min-h-screen flex items-center justify-center px-4">
         <div className="text-center max-w-4xl mx-auto animate-fade-in">
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-            Discover
+            Descubre
             <span className="block bg-gradient-sunset bg-clip-text text-transparent">
               San Gil
             </span>
           </h1>
           
           <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-2xl mx-auto leading-relaxed">
-            The adventure capital of Colombia awaits you. Explore authentic flavors, 
-            thrilling adventures, and rich culture in the heart of Santander.
+            La capital de la aventura de Colombia te espera. Explora sabores auténticos, 
+            emocionantes aventuras y rica cultura en el corazón de Santander.
           </p>
           
           <Button 
@@ -38,7 +38,7 @@ export function WelcomeScreen({ onExplore }: WelcomeScreenProps) {
             onClick={onExplore}
             className="animate-scale-in"
           >
-            Explore More
+            Explorar Más
           </Button>
         </div>
       </div>
