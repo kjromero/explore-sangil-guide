@@ -8,6 +8,7 @@ export interface Location {
   bookingUrl?: string;
   tags: string[];
   category: string;
+  subcategory?: string;
   coordinates: [number, number];
 }
 

@@ -10,7 +10,8 @@
       "bookingUrl": "https://reservations.mock/jenny",
       "tags": ["familiar", "comida local", "tradicional"],
       "category": "gastronomía",
-      "coordinates": [4.9176418,-74.1122502]
+      "subcategory": "Restaurantes",
+      "coordinates": [6.556, -73.133]
     },
     {
       "id": 2,
@@ -21,7 +22,8 @@
       "mapsUrl": "https://maps.google.com/?q=6.558,-73.135",
       "tags": ["café", "pasteles", "relajante"],
       "category": "gastronomía",
-      "coordinates": [4.9176418,-74.1122502]
+      "subcategory": "Cafés",
+      "coordinates": [6.558, -73.135]
     }
   ],
   "culture": [
@@ -34,7 +36,8 @@
       "mapsUrl": "https://maps.google.com/?q=6.559,-73.140",
       "tags": ["patrimonio", "visitas guiadas", "naturaleza"],
       "category": "cultura",
-      "coordinates": [4.9176418,-74.1122502]
+      "subcategory": "Sitios Históricos",
+      "coordinates": [6.559, -73.140]
     },
     {
       "id": 2,
@@ -45,7 +48,8 @@
       "mapsUrl": "https://maps.google.com/?q=6.554,-73.134",
       "tags": ["colonial", "arquitectura", "religioso"],
       "category": "cultura",
-      "coordinates": [4.9176418,-74.1122502]
+      "subcategory": "Sitios Históricos",
+      "coordinates": [6.554, -73.134]
     }
   ],
   "adventure": [
@@ -59,7 +63,8 @@
       "bookingUrl": "https://adventure.mock/paragliding",
       "tags": ["adrenalina", "adultos", "vistas panorámicas"],
       "category": "aventura",
-      "coordinates": [4.9176418,-74.1122502]
+      "subcategory": "Deportes Extremos",
+      "coordinates": [6.560, -73.135]
     },
     {
       "id": 2,
@@ -71,7 +76,8 @@
       "bookingUrl": "https://adventure.mock/rafting",
       "tags": ["deportes acuáticos", "adrenalina", "grupos"],
       "category": "aventura",
-      "coordinates": [4.9176418,-74.1122502]
+      "subcategory": "Deportes Extremos",
+      "coordinates": [6.545, -73.120]
     }
   ],
   "shops": [
@@ -84,7 +90,8 @@
       "mapsUrl": "https://maps.google.com/?q=6.553,-73.137",
       "tags": ["servicios", "electrónica", "reparación"],
       "category": "tiendas",
-      "coordinates": [4.9176418,-74.1122502]
+      "subcategory": "Servicios",
+      "coordinates": [6.553, -73.137]
     },
     {
       "id": 2,
@@ -95,7 +102,8 @@
       "mapsUrl": "https://maps.google.com/?q=6.555,-73.132",
       "tags": ["artesanías", "souvenirs", "arte local"],
       "category": "tiendas",
-      "coordinates": [4.9176418,-74.1122502]
+      "subcategory": "Artesanías",
+      "coordinates": [6.555, -73.132]
     }
   ],
   "shop_products": [

@@ -11,6 +11,7 @@ const MAPBOX_TOKEN = 'pk.eyJ1Ijoia2pyb21lcm8xIiwiYSI6ImNtZWpldjl5YjBjeHAybXE4a2J
 
 interface MapViewProps {
   activeCategory: Category;
+  activeSubcategory: string | null;
   onLocationSelect: (location: Location) => void;
 }
 
@@ -28,7 +29,7 @@ const categoryColors = {
   'tiendas': '#3b82f6',
 };
 
-export function MapView({ activeCategory, onLocationSelect }: MapViewProps) {
+export function MapView({ activeCategory, activeSubcategory, onLocationSelect }: MapViewProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<mapboxgl.Marker[]>([]);
@@ -42,9 +43,11 @@ export function MapView({ activeCategory, onLocationSelect }: MapViewProps) {
     ...mockData.shops,
   ] as Location[];
 
-  const filteredLocations = activeCategory === 'all' 
+  const filteredLocations = activeCategory === 'todo' 
     ? allLocations 
-    : allLocations.filter(location => location.category === activeCategory);
+    : activeSubcategory 
+      ? allLocations.filter(location => location.category === activeCategory && location.subcategory === activeSubcategory)
+      : allLocations.filter(location => location.category === activeCategory);
 
   useEffect(() => {
     if (!mapContainer.current || (!MAPBOX_TOKEN && !userToken) || showTokenInput) return;
@@ -118,14 +121,6 @@ export function MapView({ activeCategory, onLocationSelect }: MapViewProps) {
       el.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
       el.style.transition = 'transform 0.2s ease';
       el.textContent = categoryIcons[location.category as keyof typeof categoryIcons];
-
-      el.addEventListener('mouseenter', () => {
-        el.style.transform = 'scale(1.2)';
-      });
-
-      el.addEventListener('mouseleave', () => {
-        el.style.transform = 'scale(1)';
-      });
 
       el.addEventListener('click', () => {
         onLocationSelect(location);

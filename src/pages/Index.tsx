@@ -7,8 +7,9 @@ import { ShopSection } from '@/components/ShopSection';
 import type { Location } from '@/types';
 
 const Index = () => {
-  const [showWelcome, setShowWelcome] = useState(true);
-  const [activeCategory, setActiveCategory] = useState<Category>('all');
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<Category>('todo');
+  const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -35,12 +36,15 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <FilterBar 
         activeCategory={activeCategory}
+        activeSubcategory={activeSubcategory}
         onCategoryChange={setActiveCategory}
+        onSubcategoryChange={setActiveSubcategory}
         onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
       />
       
       <MapView 
         activeCategory={activeCategory}
+        activeSubcategory={activeSubcategory}
         onLocationSelect={handleLocationSelect}
       />
       
