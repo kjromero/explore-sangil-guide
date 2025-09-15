@@ -1,22 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { MapPin, Plus, X } from "lucide-react";
 import type { Location } from "@/types";
-import type { Category } from "@/components/FilterBar";
-import { SUBCATEGORIES } from "@/config/subcategories";
 import { addLocation, generateNextId } from "@/utils/adminData";
+import allLocations from "@/data/locations.json";
 
 // Zod schema for location validation
 const locationSchema = z.object({
@@ -26,7 +24,7 @@ const locationSchema = z.object({
   photo: z.string().min(1, "La foto es requerida"),
   mapsUrl: z.string().url("Ingrese una URL válida de Google Maps"),
   bookingUrl: z.string().url("Ingrese una URL válida").optional().or(z.literal("")),
-  category: z.enum(["gastronomía", "aventura", "cultura", "tiendas"]),
+  category: z.string().min(1, "La categoría es requerida"),
   subcategory: z.string().optional(),
   coordinates: z.tuple([z.number(), z.number()])
     .refine(([lat, lng]) => lat >= -90 && lat <= 90, "La latitud debe estar entre -90 y 90")
@@ -42,7 +40,6 @@ interface AdminFormProps {
 
 export function AdminForm({ onLocationAdd }: AdminFormProps) {
   const [newTag, setNewTag] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<Category | "">("");
   
   const form = useForm<LocationFormData>({
     resolver: zodResolver(locationSchema),
@@ -53,7 +50,7 @@ export function AdminForm({ onLocationAdd }: AdminFormProps) {
       photo: "",
       mapsUrl: "",
       bookingUrl: "",
-      category: "gastronomía",
+      category: "",
       subcategory: "",
       coordinates: [6.554, -73.134], // Default San Gil coordinates
       tags: [],
@@ -62,6 +59,12 @@ export function AdminForm({ onLocationAdd }: AdminFormProps) {
 
   const watchedCategory = form.watch("category");
   const watchedTags = form.watch("tags");
+
+  const existingCategories = useMemo(() => [...new Set(allLocations.map(l => l.category))], []);
+  const subcategoriesForCategory = useMemo(() => {
+    if (!watchedCategory) return [];
+    return [...new Set(allLocations.filter(l => l.category === watchedCategory).map(l => l.subcategory))];
+  }, [watchedCategory]);
 
   const handleAddTag = () => {
     if (newTag.trim() && !watchedTags.includes(newTag.trim())) {
@@ -74,16 +77,9 @@ export function AdminForm({ onLocationAdd }: AdminFormProps) {
     form.setValue("tags", watchedTags.filter(tag => tag !== tagToRemove));
   };
 
-  const handleCategoryChange = (category: Category) => {
-    setSelectedCategory(category);
-    form.setValue("category", category);
-    form.setValue("subcategory", ""); // Reset subcategory when category changes
-  };
-
   const onSubmit = async (data: LocationFormData) => {
     try {
-      // Generate new ID using utility function
-      const nextId = await generateNextId(data.category);
+      const nextId = await generateNextId();
       
       const newLocation: Location = {
         id: nextId,
@@ -92,15 +88,11 @@ export function AdminForm({ onLocationAdd }: AdminFormProps) {
         subcategory: data.subcategory || undefined,
       };
 
-      // Add location using utility function
       await addLocation(newLocation);
-      
-      // Notify parent component
       onLocationAdd(newLocation);
       
       toast.success("¡Ubicación agregada exitosamente!");
       form.reset();
-      setSelectedCategory("");
     } catch (error) {
       console.error("Error adding location:", error);
       toast.error("Error al agregar la ubicación");
@@ -178,50 +170,33 @@ export function AdminForm({ onLocationAdd }: AdminFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Categoría</FormLabel>
-                    <Select onValueChange={(value) => handleCategoryChange(value as Category)} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona una categoría" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="gastronomía">Gastronomía</SelectItem>
-                        <SelectItem value="aventura">Aventura</SelectItem>
-                        <SelectItem value="cultura">Cultura</SelectItem>
-                        <SelectItem value="tiendas">Tiendas</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <Input placeholder="Ej: gastronomía" {...field} list="categories-datalist" />
+                    </FormControl>
+                    <datalist id="categories-datalist">
+                      {existingCategories.map(cat => <option key={cat} value={cat} />)}
+                    </datalist>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {selectedCategory && SUBCATEGORIES[selectedCategory as Category]?.length > 0 && (
-                <FormField
-                  control={form.control}
-                  name="subcategory"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Subcategoría</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona una subcategoría" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {SUBCATEGORIES[selectedCategory as Category].map((subcategory) => (
-                            <SelectItem key={subcategory} value={subcategory}>
-                              {subcategory}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
+              <FormField
+                control={form.control}
+                name="subcategory"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Subcategoría</FormLabel>
+                     <FormControl>
+                      <Input placeholder="Ej: Restaurantes" {...field} list="subcategories-datalist" />
+                    </FormControl>
+                    <datalist id="subcategories-datalist">
+                      {subcategoriesForCategory.map(sub => <option key={sub} value={sub} />)}
+                    </datalist>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             {/* Coordinates */}
@@ -374,3 +349,4 @@ export function AdminForm({ onLocationAdd }: AdminFormProps) {
     </Card>
   );
 }
+

@@ -1,8 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Instagram, ShoppingCart } from "lucide-react";
-import mockData from '@/data/mockData.json';
-import tshirtMockup from "@/assets/tshirt-mockup.jpg";
+import productsData from '@/data/products.json';
+
+// Helper to dynamically import images from assets
+const getImageUrl = (imageName: string) => {
+  return new URL(`../assets/${imageName}`, import.meta.url).href;
+};
 
 export function ShopSection() {
   return (
@@ -20,12 +24,12 @@ export function ShopSection() {
         </div>
         
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {mockData.shop_products.map((product) => (
+          {productsData.map((product) => (
             <Card key={product.id} className="bg-gradient-card shadow-elegant hover:shadow-warm transition-all duration-300 transform hover:scale-105">
               <CardHeader className="p-0">
                 <div className="h-64 rounded-t-lg overflow-hidden">
                   <img 
-                    src={tshirtMockup}
+                    src={getImageUrl(product.image)}
                     alt={product.name}
                     className="w-full h-full object-cover"
                   />

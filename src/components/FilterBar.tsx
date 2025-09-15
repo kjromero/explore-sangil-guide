@@ -6,9 +6,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { UtensilsCrossed, Mountain, Landmark, ShoppingBag, Menu, ChevronDown } from "lucide-react";
-import { SUBCATEGORIES, hasSubcategories } from "@/config/subcategories";
+import allLocations from '@/data/locations.json';
 
-export type Category = 'todo' | 'gastronomía' | 'aventura' | 'cultura' | 'tiendas';
+// The Category type is now a flexible string
+export type Category = string;
 
 interface FilterBarProps {
   activeCategory: Category;
@@ -18,18 +19,27 @@ interface FilterBarProps {
   onMenuToggle: () => void;
 }
 
+// This array still defines the primary categories and their icons for the UI
 const categories = [
-  { id: 'todo' as Category, label: 'Todo', icon: Menu },
-  { id: 'gastronomía' as Category, label: 'Gastronomía', icon: UtensilsCrossed },
-  { id: 'aventura' as Category, label: 'Aventura', icon: Mountain },
-  { id: 'cultura' as Category, label: 'Cultura', icon: Landmark },
-  { id: 'tiendas' as Category, label: 'Tiendas', icon: ShoppingBag },
+  { id: 'todo', label: 'Todo', icon: Menu },
+  { id: 'gastronomía', label: 'Gastronomía', icon: UtensilsCrossed },
+  { id: 'aventura', label: 'Aventura', icon: Mountain },
+  { id: 'cultura', label: 'Cultura', icon: Landmark },
+  { id: 'tiendas', label: 'Tiendas', icon: ShoppingBag },
 ];
+
+// Helper function to get subcategories dynamically from the data
+const getSubcategoriesFor = (category: Category): string[] => {
+  if (category === 'todo') return [];
+  const subcategories = allLocations
+    .filter(location => location.category === category)
+    .map(location => location.subcategory);
+  return [...new Set(subcategories)].filter(Boolean); // Return unique, non-empty subcategories
+};
 
 export function FilterBar({ activeCategory, activeSubcategory, onCategoryChange, onSubcategoryChange, onMenuToggle }: FilterBarProps) {
   const handleCategoryClick = (category: Category) => {
     if (activeCategory === category) {
-      // If clicking the same category, toggle it off or reset to todo
       onCategoryChange('todo');
       onSubcategoryChange(null);
     } else {
@@ -40,6 +50,69 @@ export function FilterBar({ activeCategory, activeSubcategory, onCategoryChange,
 
   const handleSubcategoryClick = (subcategory: string) => {
     onSubcategoryChange(subcategory);
+  };
+
+  const renderCategory = (category: typeof categories[0], isMobile = false) => {
+    const Icon = category.icon;
+    const subcategories = getSubcategoriesFor(category.id);
+    const hasSubs = subcategories.length > 0;
+    const isActive = activeCategory === category.id;
+
+    if (category.id === 'todo') {
+      return (
+        <Button
+          key={category.id}
+          variant={isActive ? "default" : "filter"}
+          size="sm"
+          onClick={() => handleCategoryClick(category.id)}
+          className={`transition-smooth ${isMobile ? 'flex-shrink-0' : ''}`}
+        >
+          <Icon className="h-4 w-4 mr-2" />
+          {category.label}
+        </Button>
+      );
+    }
+
+    return (
+      <DropdownMenu key={category.id}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant={isActive ? "default" : "filter"}
+            size="sm"
+            onClick={!hasSubs ? () => handleCategoryClick(category.id) : undefined}
+            className={`transition-smooth ${isMobile ? 'flex-shrink-0' : ''}`}
+          >
+            <Icon className="h-4 w-4 mr-2" />
+            {category.label}
+            {hasSubs && <ChevronDown className="h-3 w-3 ml-1" />}
+          </Button>
+        </DropdownMenuTrigger>
+        {hasSubs && (
+          <DropdownMenuContent align="start" className="w-48">
+            <DropdownMenuItem
+              onClick={() => handleCategoryClick(category.id)}
+              className={isActive && !activeSubcategory ? "bg-accent" : ""}
+            >
+              Todo {category.label.toLowerCase()}
+            </DropdownMenuItem>
+            {subcategories.map((subcategory) => (
+              <DropdownMenuItem
+                key={subcategory}
+                onClick={() => {
+                  if (activeCategory !== category.id) {
+                    onCategoryChange(category.id);
+                  }
+                  handleSubcategoryClick(subcategory);
+                }}
+                className={isActive && activeSubcategory === subcategory ? "bg-accent" : ""}
+              >
+                {subcategory}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        )}
+      </DropdownMenu>
+    );
   };
 
   return (
@@ -54,133 +127,13 @@ export function FilterBar({ activeCategory, activeSubcategory, onCategoryChange,
           
           {/* Desktop Categories */}
           <div className="hidden md:flex items-center space-x-2">
-            {categories.map((category) => {
-              const Icon = category.icon;
-              const hasSubs = hasSubcategories(category.id);
-              const isActive = activeCategory === category.id;
-              
-              if (category.id === 'todo') {
-                return (
-                  <Button
-                    key={category.id}
-                    variant={isActive ? "default" : "filter"}
-                    size="sm"
-                    onClick={() => handleCategoryClick(category.id)}
-                    className="transition-smooth"
-                  >
-                    <Icon className="h-4 w-4 mr-2" />
-                    {category.label}
-                  </Button>
-                );
-              }
-              
-              return (
-                <DropdownMenu key={category.id}>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant={isActive ? "default" : "filter"}
-                      size="sm"
-                      className="transition-smooth"
-                    >
-                      <Icon className="h-4 w-4 mr-2" />
-                      {category.label}
-                      {hasSubs && <ChevronDown className="h-3 w-3 ml-1" />}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  {hasSubs && (
-                    <DropdownMenuContent align="start" className="w-48">
-                      <DropdownMenuItem
-                        onClick={() => handleCategoryClick(category.id)}
-                        className={isActive && !activeSubcategory ? "bg-accent" : ""}
-                      >
-                        Todo {category.label.toLowerCase()}
-                      </DropdownMenuItem>
-                      {SUBCATEGORIES[category.id].map((subcategory) => (
-                        <DropdownMenuItem
-                          key={subcategory}
-                          onClick={() => {
-                            // Ensure the parent category is set when a subcategory is selected
-                            if (activeCategory !== category.id) {
-                              onCategoryChange(category.id);
-                            }
-                            handleSubcategoryClick(subcategory);
-                          }}
-                          className={isActive && activeSubcategory === subcategory ? "bg-accent" : ""}
-                        >
-                          {subcategory}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  )}
-                </DropdownMenu>
-              );
-            })}
+            {categories.map(category => renderCategory(category, false))}
           </div>
         </div>
         
         {/* Mobile Categories */}
         <div className="md:hidden mt-3 flex gap-2 overflow-x-auto pb-2">
-          {categories.map((category) => {
-            const Icon = category.icon;
-            const hasSubs = hasSubcategories(category.id);
-            const isActive = activeCategory === category.id;
-            
-            if (category.id === 'todo') {
-              return (
-                <Button
-                  key={category.id}
-                  variant={isActive ? "default" : "filter"}
-                  size="sm"
-                  onClick={() => handleCategoryClick(category.id)}
-                  className="flex-shrink-0 transition-smooth"
-                >
-                  <Icon className="h-4 w-4 mr-2" />
-                  {category.label}
-                </Button>
-              );
-            }
-            
-            return (
-              <DropdownMenu key={category.id}>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant={isActive ? "default" : "filter"}
-                    size="sm"
-                    className="flex-shrink-0 transition-smooth"
-                  >
-                    <Icon className="h-4 w-4 mr-2" />
-                    {category.label}
-                    {hasSubs && <ChevronDown className="h-3 w-3 ml-1" />}
-                  </Button>
-                </DropdownMenuTrigger>
-                {hasSubs && (
-                  <DropdownMenuContent align="start" className="w-48">
-                    <DropdownMenuItem
-                      onClick={() => handleCategoryClick(category.id)}
-                      className={isActive && !activeSubcategory ? "bg-accent" : ""}
-                    >
-                      Todo {category.label.toLowerCase()}
-                    </DropdownMenuItem>
-                    {SUBCATEGORIES[category.id].map((subcategory) => (
-                      <DropdownMenuItem
-                        key={subcategory}
-                        onClick={() => {
-                          // Ensure the parent category is set when a subcategory is selected
-                          if (activeCategory !== category.id) {
-                            onCategoryChange(category.id);
-                          }
-                          handleSubcategoryClick(subcategory);
-                        }}
-                        className={isActive && activeSubcategory === subcategory ? "bg-accent" : ""}
-                      >
-                        {subcategory}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                )}
-              </DropdownMenu>
-            );
-          })}
+          {categories.map(category => renderCategory(category, true))}
         </div>
       </div>
     </div>

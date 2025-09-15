@@ -1,0 +1,19 @@
+
+[
+  {
+    "id": "prod-1",
+    "name": "Camiseta de Aventura San Gil",
+    "description": "Camiseta de algodón premium con el paisaje icónico de San Gil y gráficos de deportes de aventura.",
+    "price": "$25.000 COP",
+    "image": "tshirt-mockup.jpg",
+    "instagramUrl": "https://instagram.com/sangiltourism"
+  },
+  {
+    "id": "prod-2",
+    "name": "Sudadera Cañón del Chicamocha",
+    "description": "Sudadera cómoda con impresionante diseño del cañón y marca de San Gil.",
+    "price": "$45.000 COP",
+    "image": "tshirt-mockup.jpg",
+    "instagramUrl": "https://instagram.com/sangiltourism"
+  }
+]

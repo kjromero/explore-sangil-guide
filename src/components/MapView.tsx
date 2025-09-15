@@ -1,29 +1,27 @@
 import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import type { Category } from './FilterBar';
 import type { Location } from '@/types';
-import mockData from '@/data/mockData.json';
-import { SUBCATEGORIES } from '@/config/subcategories';
+import allLocations from '@/data/locations.json';
 
 // You'll need to add your Mapbox token here
 // For now, using a placeholder - user will need to provide their token
 const MAPBOX_TOKEN = 'pk.eyJ1Ijoia2pyb21lcm8xIiwiYSI6ImNtZWpldjl5YjBjeHAybXE4a2JxeG14am8ifQ.gVSUiqu0uC3nAWXoYXRr7A';
 
 interface MapViewProps {
-  activeCategory: Category;
+  activeCategory: string;
   activeSubcategory: string | null;
   onLocationSelect: (location: Location) => void;
 }
 
-const categoryIcons = {
+const categoryIcons: Record<string, string> = {
   'gastronomía': '🍽️',
   'aventura': '🏔️',
   'cultura': '🏛️',
   'tiendas': '🛍️',
 };
 
-const categoryColors = {
+const categoryColors: Record<string, string> = {
   'gastronomía': '#f59e0b',
   'aventura': '#10b981',
   'cultura': '#8b5cf6',
@@ -36,13 +34,6 @@ export function MapView({ activeCategory, activeSubcategory, onLocationSelect }:
   const markers = useRef<mapboxgl.Marker[]>([]);
   const [showTokenInput, setShowTokenInput] = useState(!MAPBOX_TOKEN);
   const [userToken, setUserToken] = useState('');
-
-  const allLocations: Location[] = [
-    ...mockData.gastronomy,
-    ...mockData.culture,
-    ...mockData.adventure,
-    ...mockData.shops,
-  ] as Location[];
 
   const filteredLocations = activeCategory === 'todo' 
     ? allLocations 
@@ -112,7 +103,7 @@ export function MapView({ activeCategory, activeSubcategory, onLocationSelect }:
       el.style.width = '32px';
       el.style.height = '32px';
       el.style.borderRadius = '50%';
-      el.style.backgroundColor = categoryColors[location.category as keyof typeof categoryColors];
+      el.style.backgroundColor = categoryColors[location.category as keyof typeof categoryColors] || '#cccccc';
       el.style.display = 'flex';
       el.style.alignItems = 'center';
       el.style.justifyContent = 'center';
@@ -121,7 +112,7 @@ export function MapView({ activeCategory, activeSubcategory, onLocationSelect }:
       el.style.border = '3px solid white';
       el.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
       el.style.transition = 'transform 0.2s ease';
-      el.textContent = categoryIcons[location.category as keyof typeof categoryIcons];
+      el.textContent = categoryIcons[location.category as keyof typeof categoryIcons] || '📍';
 
       el.addEventListener('click', () => {
         onLocationSelect(location);
@@ -135,6 +126,11 @@ export function MapView({ activeCategory, activeSubcategory, onLocationSelect }:
     });
   };
 
+  const subcategoriesForActiveCategory = [...new Set(allLocations
+    .filter(loc => loc.category === activeCategory)
+    .map(loc => loc.subcategory)
+    .filter(Boolean)
+  )];
 
   return (
     <div className="relative h-screen pt-16">
@@ -151,9 +147,9 @@ export function MapView({ activeCategory, activeSubcategory, onLocationSelect }:
             <div className="flex items-center space-x-2 text-sm">
               <div 
                 className="w-4 h-4 rounded-full flex items-center justify-center text-xs"
-                style={{ backgroundColor: categoryColors[activeCategory as keyof typeof categoryColors] }}
+                style={{ backgroundColor: categoryColors[activeCategory] || '#cccccc' }}
               >
-                {categoryIcons[activeCategory as keyof typeof categoryIcons]}
+                {categoryIcons[activeCategory] || '📍'}
               </div>
               <span className="font-medium">{activeSubcategory}</span>
             </div>
@@ -163,7 +159,7 @@ export function MapView({ activeCategory, activeSubcategory, onLocationSelect }:
               <div key={category} className="flex items-center space-x-2 text-sm">
                 <div 
                   className="w-4 h-4 rounded-full flex items-center justify-center text-xs"
-                  style={{ backgroundColor: categoryColors[category as keyof typeof categoryColors] }}
+                  style={{ backgroundColor: categoryColors[category] || '#cccccc' }}
                 >
                   {icon}
                 </div>
@@ -176,17 +172,17 @@ export function MapView({ activeCategory, activeSubcategory, onLocationSelect }:
               <div className="flex items-center space-x-2 text-sm">
                 <div 
                   className="w-4 h-4 rounded-full flex items-center justify-center text-xs"
-                  style={{ backgroundColor: categoryColors[activeCategory as keyof typeof categoryColors] }}
+                  style={{ backgroundColor: categoryColors[activeCategory] || '#cccccc' }}
                 >
-                  {categoryIcons[activeCategory as keyof typeof categoryIcons]}
+                  {categoryIcons[activeCategory] || '📍'}
                 </div>
                 <span className="font-medium capitalize">{activeCategory}</span>
               </div>
-              {SUBCATEGORIES[activeCategory].map((subcategory) => (
+              {subcategoriesForActiveCategory.map((subcategory) => (
                 <div key={subcategory} className="flex items-center space-x-2 text-sm ml-6">
                   <div 
                     className="w-3 h-3 rounded-full flex items-center justify-center text-xs"
-                    style={{ backgroundColor: categoryColors[activeCategory as keyof typeof categoryColors] }}
+                    style={{ backgroundColor: categoryColors[activeCategory] || '#cccccc' }}
                   >
                     <span className="text-[8px]">•</span>
                   </div>

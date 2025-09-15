@@ -11,13 +11,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Settings, MapPin, Plus, Eye, Edit, Trash2, Download, Upload, LogOut } from "lucide-react";
 import type { Location } from "@/types";
-import { exportData, getTempLocations, getAllLocations as fetchAllLocations } from "@/utils/adminData";
+import { exportData, getTempLocations } from "@/utils/adminData";
 import { useAuth } from "@/contexts/AuthContext";
 
-// Mock data - in real app this would come from API
-const fetchMockData = async () => {
-  const response = await import("@/data/mockData.json");
-  return response.default;
+// Fetch locations data
+const fetchLocations = async (): Promise<Location[]> => {
+  const response = await import("@/data/locations.json");
+  // The default export from a JSON module is the JSON object itself.
+  // We need to handle the case where the module might have a `default` property or not.
+  return (response.default as unknown as Location[]) || [];
 };
 
 export default function Admin() {
@@ -25,9 +27,9 @@ export default function Admin() {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const { user, logout } = useAuth();
 
-  const { data: mockData, isLoading, error } = useQuery({
-    queryKey: ["mockData"],
-    queryFn: fetchMockData,
+  const { data: allLocations = [], isLoading, error } = useQuery({
+    queryKey: ["locationsData"],
+    queryFn: fetchLocations,
   });
 
   const handleLocationAdd = (newLocation: Location) => {
@@ -47,17 +49,6 @@ export default function Admin() {
   const handleLogout = () => {
     logout();
     toast.success("Sesión cerrada exitosamente");
-  };
-
-  const getAllLocations = (): Location[] => {
-    if (!mockData) return [];
-    
-    return [
-      ...mockData.gastronomy.map(l => ({ ...l, category: "gastronomía" })),
-      ...mockData.culture.map(l => ({ ...l, category: "cultura" })),
-      ...mockData.adventure.map(l => ({ ...l, category: "aventura" })),
-      ...mockData.shops.map(l => ({ ...l, category: "tiendas" })),
-    ];
   };
 
   const getCategoryIcon = (category: string) => {
@@ -96,7 +87,8 @@ export default function Admin() {
     );
   }
 
-  const allLocations = getAllLocations();
+  const totalCategories = new Set(allLocations.map(l => l.category)).size;
+  const totalSubcategories = new Set(allLocations.map(l => l.subcategory)).size;
 
   return (
     <div className="min-h-screen ">
@@ -212,7 +204,7 @@ export default function Admin() {
                   <CardTitle className="text-lg">Categorías</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-3xl font-bold">4</p>
+                  <p className="text-3xl font-bold">{totalCategories}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -220,7 +212,7 @@ export default function Admin() {
                   <CardTitle className="text-lg">Subcategorías</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-3xl font-bold">12</p>
+                  <p className="text-3xl font-bold">{totalSubcategories}</p>
                 </CardContent>
               </Card>
             </div>
@@ -247,7 +239,7 @@ export default function Admin() {
                     </TableHeader>
                     <TableBody>
                       {allLocations.map((location) => (
-                        <TableRow key={`${location.category}-${location.id}`}>
+                        <TableRow key={location.id}>
                           <TableCell className="font-medium">
                             <div className="flex items-center gap-2">
                               <span>{getCategoryIcon(location.category)}</span>
