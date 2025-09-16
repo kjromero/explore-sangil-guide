@@ -13,8 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { MapPin, Plus, X } from "lucide-react";
 import type { Location } from "@/types";
-import { addLocation, generateNextId } from "@/utils/adminData";
-import allLocations from "@/data/locations.json";
+import { useLocations } from "@/hooks/useLocations";
 
 // Zod schema for location validation
 const locationSchema = z.object({
@@ -23,7 +22,6 @@ const locationSchema = z.object({
   address: z.string().min(5, "La dirección debe tener al menos 5 caracteres"),
   photo: z.string().min(1, "La foto es requerida"),
   mapsUrl: z.string().url("Ingrese una URL válida de Google Maps"),
-  bookingUrl: z.string().url("Ingrese una URL válida").optional().or(z.literal("")),
   category: z.string().min(1, "La categoría es requerida"),
   subcategory: z.string().optional(),
   coordinates: z.tuple([z.number(), z.number()])
@@ -35,12 +33,13 @@ const locationSchema = z.object({
 type LocationFormData = z.infer<typeof locationSchema>;
 
 interface AdminFormProps {
-  onLocationAdd: (location: Location) => void;
+  onLocationAdd: (location: Omit<Location, 'id'>) => void;
 }
 
 export function AdminForm({ onLocationAdd }: AdminFormProps) {
   const [newTag, setNewTag] = useState("");
-  
+  const { data: allLocations = [] } = useLocations();
+
   const form = useForm<LocationFormData>({
     resolver: zodResolver(locationSchema),
     defaultValues: {
@@ -49,10 +48,9 @@ export function AdminForm({ onLocationAdd }: AdminFormProps) {
       address: "",
       photo: "",
       mapsUrl: "",
-      bookingUrl: "",
       category: "",
       subcategory: "",
-      coordinates: [6.554, -73.134], // Default San Gil coordinates
+      coordinates: [],
       tags: [],
     },
   });
@@ -60,11 +58,11 @@ export function AdminForm({ onLocationAdd }: AdminFormProps) {
   const watchedCategory = form.watch("category");
   const watchedTags = form.watch("tags");
 
-  const existingCategories = useMemo(() => [...new Set(allLocations.map(l => l.category))], []);
+  const existingCategories = useMemo(() => [...new Set(allLocations.map(l => l.category))], [allLocations]);
   const subcategoriesForCategory = useMemo(() => {
     if (!watchedCategory) return [];
     return [...new Set(allLocations.filter(l => l.category === watchedCategory).map(l => l.subcategory))];
-  }, [watchedCategory]);
+  }, [watchedCategory, allLocations]);
 
   const handleAddTag = () => {
     if (newTag.trim() && !watchedTags.includes(newTag.trim())) {
@@ -79,18 +77,13 @@ export function AdminForm({ onLocationAdd }: AdminFormProps) {
 
   const onSubmit = async (data: LocationFormData) => {
     try {
-      const nextId = await generateNextId();
-      
-      const newLocation: Location = {
-        id: nextId,
+      const newLocation: Omit<Location, 'id'> = {
         ...data,
-        bookingUrl: data.bookingUrl || undefined,
         subcategory: data.subcategory || undefined,
       };
 
-      await addLocation(newLocation);
-      onLocationAdd(newLocation);
-      
+      await onLocationAdd(newLocation);
+
       toast.success("¡Ubicación agregada exitosamente!");
       form.reset();
     } catch (error) {
@@ -289,26 +282,7 @@ export function AdminForm({ onLocationAdd }: AdminFormProps) {
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="bookingUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URL de Reservas (opcional)</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="https://reservations.mock/jenny"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Deja en blanco si no aplica
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
+  
             {/* Tags */}
             <div className="space-y-2">
               <FormLabel>Etiquetas</FormLabel>

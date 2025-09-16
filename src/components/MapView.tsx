@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import type { Location } from '@/types';
-import allLocations from '@/data/locations.json';
+import { useLocations } from '@/hooks/useLocations';
 
 // You'll need to add your Mapbox token here
 // For now, using a placeholder - user will need to provide their token
@@ -32,20 +32,18 @@ export function MapView({ activeCategory, activeSubcategory, onLocationSelect }:
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<mapboxgl.Marker[]>([]);
-  const [showTokenInput, setShowTokenInput] = useState(!MAPBOX_TOKEN);
-  const [userToken, setUserToken] = useState('');
 
-  const filteredLocations = activeCategory === 'todo' 
-    ? allLocations 
-    : activeSubcategory 
+  const { data: allLocations = [], isLoading, error } = useLocations();
+
+  const filteredLocations = activeCategory === 'todo'
+    ? allLocations
+    : activeSubcategory
       ? allLocations.filter(location => location.category === activeCategory && location.subcategory === activeSubcategory)
       : allLocations.filter(location => location.category === activeCategory);
 
   useEffect(() => {
-    if (!mapContainer.current || (!MAPBOX_TOKEN && !userToken) || showTokenInput) return;
-
-    const token = userToken || MAPBOX_TOKEN;
-    mapboxgl.accessToken = token;
+    if (!mapContainer.current || !MAPBOX_TOKEN || isLoading) return;
+    mapboxgl.accessToken = MAPBOX_TOKEN;
 
     try {
       map.current = new mapboxgl.Map({
@@ -60,7 +58,7 @@ export function MapView({ activeCategory, activeSubcategory, onLocationSelect }:
         new mapboxgl.NavigationControl({
           visualizePitch: true,
         }),
-        'top-right'
+        'bottom-right'
       );
 
       // Add atmosphere and lighting
@@ -73,25 +71,30 @@ export function MapView({ activeCategory, activeSubcategory, onLocationSelect }:
       });
 
       updateMarkers();
-
     } catch (error) {
       console.error('Error initializing map:', error);
-      setShowTokenInput(true);
     }
 
     return () => {
       markers.current.forEach(marker => marker.remove());
       map.current?.remove();
     };
-  }, [userToken, showTokenInput]);
+  }, [isLoading]);
 
   useEffect(() => {
-    if (map.current) {
+    if (!map.current) return;
+    if (filteredLocations.length > 0) {
+      /* const bounds = new mapboxgl.LngLatBounds();
+      filteredLocations.forEach(location => {
+        bounds.extend([location.coordinates[1], location.coordinates[0]]);
+      });
+      map.current.fitBounds(bounds, { padding: 100, maxZoom: 15, duration: 1000 }); */
       updateMarkers();
     }
   }, [filteredLocations]);
 
   const updateMarkers = () => {
+    if (!map.current) return;
     // Remove existing markers
     markers.current.forEach(marker => marker.remove());
     markers.current = [];
@@ -131,6 +134,27 @@ export function MapView({ activeCategory, activeSubcategory, onLocationSelect }:
     .map(loc => loc.subcategory)
     .filter(Boolean)
   )];
+
+  if (isLoading) {
+    return (
+      <div className="relative h-screen pt-16 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Cargando ubicaciones...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="relative h-screen pt-16 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600">Error al cargar las ubicaciones</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative h-screen pt-16">

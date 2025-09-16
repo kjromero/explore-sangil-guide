@@ -38,23 +38,19 @@ export default function Login() {
 
   const onSubmit = async (data: LoginFormData) => {
     setError("");
-    
+
     try {
-      const success = await login(data.email, data.password);
-      
-      if (success) {
-        toast.success("¡Bienvenido al panel de administración!");
-        
-        // Redirect to the page they were trying to access, or admin dashboard
-        const from = location.state?.from?.pathname || "/admin";
-        navigate(from, { replace: true });
-      } else {
-        setError("Credenciales inválidas. Por favor intente nuevamente.");
-        toast.error("Credenciales inválidas");
-      }
-    } catch (err) {
-      setError("Error al iniciar sesión. Por favor intente nuevamente.");
-      toast.error("Error al iniciar sesión");
+      await login(data.email, data.password);
+
+      toast.success("¡Bienvenido al panel de administración!");
+
+      // Redirect to the page they were trying to access, or admin dashboard
+      const from = location.state?.from?.pathname || "/admin";
+      navigate(from, { replace: true });
+    } catch (err: any) {
+      const errorMessage = err.message || "Error al iniciar sesión. Por favor intente nuevamente.";
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -157,12 +153,12 @@ export default function Login() {
               </form>
             </Form>
 
-            {/* Demo credentials info */}
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <h4 className="font-medium text-blue-900 mb-2">Credenciales de Demo</h4>
-              <div className="text-sm text-blue-700 space-y-1">
-                <p><strong>Email:</strong> admin@sangil.com</p>
-                <p><strong>Contraseña:</strong> admin123</p>
+            {/* Firebase Auth info */}
+            <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
+              <h4 className="font-medium text-green-900 mb-2">Autenticación Firebase</h4>
+              <div className="text-sm text-green-700 space-y-1">
+                <p>Use sus credenciales de Firebase Authentication para iniciar sesión.</p>
+                <p className="text-xs mt-2">Las cuentas deben ser creadas en la consola de Firebase.</p>
               </div>
             </div>
           </CardContent>

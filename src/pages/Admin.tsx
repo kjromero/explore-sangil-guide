@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { AdminForm } from "@/components/AdminForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,46 +8,52 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Settings, MapPin, Plus, Eye, Edit, Trash2, Download, Upload, LogOut } from "lucide-react";
+import { Settings, MapPin, Plus, Eye, Edit, Trash2, Download, Upload, LogOut, CheckCircle } from "lucide-react";
 import type { Location } from "@/types";
-import { exportData, getTempLocations } from "@/utils/adminData";
 import { useAuth } from "@/contexts/AuthContext";
-
-// Fetch locations data
-const fetchLocations = async (): Promise<Location[]> => {
-  const response = await import("@/data/locations.json");
-  // The default export from a JSON module is the JSON object itself.
-  // We need to handle the case where the module might have a `default` property or not.
-  return (response.default as unknown as Location[]) || [];
-};
+import { useLocations, useCreateLocation, useUpdateLocation, useDeleteLocation } from "@/hooks/useLocations";
 
 export default function Admin() {
-  const [locations, setLocations] = useState<Location[]>([]);
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const { user, logout } = useAuth();
+  const { data: allLocations = [], isLoading, error } = useLocations();
+  const createLocation = useCreateLocation();
+  const updateLocation = useUpdateLocation();
+  const deleteLocation = useDeleteLocation();
 
-  const { data: allLocations = [], isLoading, error } = useQuery({
-    queryKey: ["locationsData"],
-    queryFn: fetchLocations,
-  });
-
-  const handleLocationAdd = (newLocation: Location) => {
-    setLocations(prev => [...prev, newLocation]);
-    toast.success("Ubicación agregada a la lista temporal");
-  };
-
-  const handleExportData = async () => {
+  const handleLocationAdd = async (newLocation: Omit<Location, 'id'>) => {
     try {
-      await exportData();
-      toast.success("Datos exportados exitosamente");
+      await createLocation.mutateAsync(newLocation);
+      toast.success("Ubicación agregada exitosamente");
     } catch (error) {
-      toast.error("Error al exportar datos");
+      toast.error("Error al agregar la ubicación");
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    toast.success("Sesión cerrada exitosamente");
+  const handleLocationEdit = async (id: string, updates: Partial<Location>) => {
+    try {
+      await updateLocation.mutateAsync({ id, updates });
+      toast.success("Ubicación actualizada exitosamente");
+    } catch (error) {
+      toast.error("Error al actualizar la ubicación");
+    }
+  };
+
+  const handleLocationDelete = async (id: string) => {
+    try {
+      await deleteLocation.mutateAsync(id);
+      toast.success("Ubicación eliminada exitosamente");
+    } catch (error) {
+      toast.error("Error al eliminar la ubicación");
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success("Sesión cerrada exitosamente");
+    } catch (error) {
+      toast.error("Error al cerrar sesión");
+    }
   };
 
   const getCategoryIcon = (category: string) => {
@@ -111,14 +116,6 @@ export default function Admin() {
                 <p className="text-xs text-muted-foreground">{user?.email}</p>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={handleExportData}>
-                  <Download className="h-4 w-4 mr-2" />
-                  Exportar Datos
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Upload className="h-4 w-4 mr-2" />
-                  Importar
-                </Button>
                 <Button variant="destructive" size="sm" onClick={handleLogout}>
                   <LogOut className="h-4 w-4 mr-2" />
                   Cerrar Sesión
@@ -144,49 +141,7 @@ export default function Admin() {
           </TabsList>
 
           <TabsContent value="add" className="space-y-6">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <div className="bg-blue-100 p-2 rounded-full">
-                  <Info className="h-4 w-4 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="font-medium text-blue-900">Nota importante</h3>
-                  <p className="text-sm text-blue-700 mt-1">
-                    Por ahora, las nuevas ubicaciones se agregan temporalmente. Pronto implementaremos una conexión a base de datos para persistencia permanente.
-                  </p>
-                </div>
-              </div>
-            </div>
-            
             <AdminForm onLocationAdd={handleLocationAdd} />
-            
-            {/* Temporary locations list */}
-            {getTempLocations().length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Ubicaciones Temporales</CardTitle>
-                  <CardDescription>
-                    Estas ubicaciones se han agregado en esta sesión pero no están guardadas permanentemente
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {getTempLocations().map((location, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <span className="text-lg">{getCategoryIcon(location.category)}</span>
-                          <div>
-                            <h4 className="font-medium">{location.name}</h4>
-                            <p className="text-sm text-muted-foreground">{location.address}</p>
-                          </div>
-                        </div>
-                        <Badge variant="outline">Temporal</Badge>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
           </TabsContent>
 
           <TabsContent value="manage" className="space-y-6">
@@ -256,13 +211,34 @@ export default function Admin() {
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-1">
-                              <Button disabled variant="ghost" size="sm">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  alert(`Ubicación: ${location.name}\nDirección: ${location.address}\nCategoría: ${location.category}\nDescripción: ${location.description}`);
+                                }}
+                              >
                                 <Eye className="h-4 w-4" />
                               </Button>
-                              <Button disabled variant="ghost" size="sm">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  // Simple edit for now - just updates the timestamp
+                                  handleLocationEdit(location.id, { ...location });
+                                }}
+                              >
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Button disabled variant="ghost" size="sm">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  if (confirm(`¿Estás seguro de que quieres eliminar "${location.name}"?`)) {
+                                    handleLocationDelete(location.id);
+                                  }
+                                }}
+                              >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
@@ -280,6 +256,3 @@ export default function Admin() {
     </div>
   );
 }
-
-// Import the Info icon that's used in the component
-import { Info } from "lucide-react";

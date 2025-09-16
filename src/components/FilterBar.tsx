@@ -6,7 +6,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { UtensilsCrossed, Mountain, Landmark, ShoppingBag, Menu, ChevronDown } from "lucide-react";
-import allLocations from '@/data/locations.json';
+import { useLocations } from "@/hooks/useLocations";
+import type { Location } from "@/types";
 
 // The Category type is now a flexible string
 export type Category = string;
@@ -29,15 +30,16 @@ const categories = [
 ];
 
 // Helper function to get subcategories dynamically from the data
-const getSubcategoriesFor = (category: Category): string[] => {
+const getSubcategoriesFor = (category: Category, locations: Location[]): string[] => {
   if (category === 'todo') return [];
-  const subcategories = allLocations
+  const subcategories = locations
     .filter(location => location.category === category)
     .map(location => location.subcategory);
   return [...new Set(subcategories)].filter(Boolean); // Return unique, non-empty subcategories
 };
 
 export function FilterBar({ activeCategory, activeSubcategory, onCategoryChange, onSubcategoryChange, onMenuToggle }: FilterBarProps) {
+  const { data: locations = [] } = useLocations();
   const handleCategoryClick = (category: Category) => {
     if (activeCategory === category) {
       onCategoryChange('todo');
@@ -54,7 +56,7 @@ export function FilterBar({ activeCategory, activeSubcategory, onCategoryChange,
 
   const renderCategory = (category: typeof categories[0], isMobile = false) => {
     const Icon = category.icon;
-    const subcategories = getSubcategoriesFor(category.id);
+    const subcategories = getSubcategoriesFor(category.id, locations);
     const hasSubs = subcategories.length > 0;
     const isActive = activeCategory === category.id;
 

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Instagram, ShoppingCart } from "lucide-react";
-import productsData from '@/data/products.json';
+import { useProducts } from "@/hooks/useProducts";
 
 // Helper to dynamically import images from assets
 const getImageUrl = (imageName: string) => {
@@ -9,22 +9,60 @@ const getImageUrl = (imageName: string) => {
 };
 
 export function ShopSection() {
+  const { data: products = [], isLoading, error } = useProducts();
+
+  if (isLoading) {
+    return (
+      <section className="py-16 bg-gradient-hero">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              San Gil
+              <span className="bg-gradient-sunset bg-clip-text text-transparent"> Merch</span>
+            </h2>
+          </div>
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="py-16 bg-gradient-hero">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              San Gil
+              <span className="bg-gradient-sunset bg-clip-text text-transparent"> Merch</span>
+            </h2>
+          </div>
+          <div className="text-center text-red-600">
+            Error al cargar los productos
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-16 bg-gradient-hero">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            San Gil 
+            San Gil
             <span className="bg-gradient-sunset bg-clip-text text-transparent"> Merch</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Take a piece of San Gil's adventure spirit home with you. 
+            Take a piece of San Gil's adventure spirit home with you.
             Premium quality apparel featuring stunning local artwork.
           </p>
         </div>
-        
+
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {productsData.map((product) => (
+          {products.map((product) => (
             <Card key={product.id} className="bg-gradient-card shadow-elegant hover:shadow-warm transition-all duration-300 transform hover:scale-105">
               <CardHeader className="p-0">
                 <div className="h-64 rounded-t-lg overflow-hidden">
