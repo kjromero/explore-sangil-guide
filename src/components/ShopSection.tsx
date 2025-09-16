@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Instagram, ShoppingCart } from "lucide-react";
+import { Instagram } from "lucide-react";
 import { useProducts } from "@/hooks/useProducts";
 
 // Helper to dynamically import images from assets
@@ -56,8 +56,8 @@ export function ShopSection() {
             <span className="bg-gradient-sunset bg-clip-text text-transparent"> Merch</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Take a piece of San Gil's adventure spirit home with you.
-            Premium quality apparel featuring stunning local artwork.
+            Lleva una pieza de el espíritu aventurero de San Gil contigo.
+            Prendas de alta calidad con impresionantes obras de arte locales.
           </p>
         </div>
 
@@ -87,18 +87,7 @@ export function ShopSection() {
                   onClick={() => window.open(product.instagramUrl, '_blank')}
                 >
                   <Instagram className="h-4 w-4 mr-2" />
-                  View on Instagram
-                </Button>
-                
-                <Button 
-                  variant="outline"
-                  size="icon"
-                  onClick={() => {
-                    // Mock add to cart functionality
-                    console.log('Added to cart:', product.name);
-                  }}
-                >
-                  <ShoppingCart className="h-4 w-4" />
+                  Ver en Instagram
                 </Button>
               </CardFooter>
             </Card>
@@ -111,7 +100,7 @@ export function ShopSection() {
             onClick={() => window.open('https://instagram.com/sangiltourism', '_blank')}
           >
             <Instagram className="h-4 w-4 mr-2" />
-            Follow @sangiltourism for more
+            Sigue a @sangiltourism para más
           </Button>
         </div>
       </div>
