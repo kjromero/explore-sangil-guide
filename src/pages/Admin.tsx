@@ -12,6 +12,7 @@ import { Settings, MapPin, Plus, Eye, Edit, Trash2, Download, Upload, LogOut, Ch
 import type { Location } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocations, useCreateLocation, useUpdateLocation, useDeleteLocation } from "@/hooks/useLocations";
+import { DetailModal } from "@/components/DetailModal";
 
 export default function Admin() {
   const { user, logout } = useAuth();
@@ -20,12 +21,55 @@ export default function Admin() {
   const updateLocation = useUpdateLocation();
   const deleteLocation = useDeleteLocation();
 
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [editingLocation, setEditingLocation] = useState<Location | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const openModal = (location: Location) => {
+    setSelectedLocation(location);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedLocation(null);
+  };
+
+  const startEdit = (location: Location) => {
+    setEditingLocation(location);
+    setShowForm(true);
+  };
+
+  const cancelEdit = () => {
+    setEditingLocation(null);
+    setShowForm(false);
+  };
+
+  const handleLocationUpdate = async (id: string, updates: Partial<Location>) => {
+    setIsSubmitting(true);
+    try {
+      await updateLocation.mutateAsync({ id, updates });
+      toast.success("Ubicación actualizada exitosamente");
+      cancelEdit();
+    } catch (error) {
+      toast.error("Error al actualizar la ubicación");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleLocationAdd = async (newLocation: Omit<Location, 'id'>) => {
+    setIsSubmitting(true);
     try {
       await createLocation.mutateAsync(newLocation);
       toast.success("Ubicación agregada exitosamente");
+      setShowForm(false);
     } catch (error) {
       toast.error("Error al agregar la ubicación");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -128,23 +172,30 @@ export default function Admin() {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="add" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="add" className="flex items-center gap-2">
+        <div className="space-y-6">
+          {/* Add Location Button */}
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold">Gestión de Ubicaciones</h2>
+            <Button
+              onClick={() => setShowForm(!showForm)}
+              className="flex items-center gap-2"
+            >
               <Plus className="h-4 w-4" />
-              Agregar Ubicación
-            </TabsTrigger>
-            <TabsTrigger value="manage" className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              Gestionar Ubicaciones
-            </TabsTrigger>
-          </TabsList>
+              {showForm ? 'Cancelar' : 'Agregar Ubicación'}
+            </Button>
+          </div>
 
-          <TabsContent value="add" className="space-y-6">
-            <AdminForm onLocationAdd={handleLocationAdd} />
-          </TabsContent>
-
-          <TabsContent value="manage" className="space-y-6">
+          {/* Form Section */}
+          {showForm ? (
+            <AdminForm
+              onLocationAdd={handleLocationAdd}
+              onLocationUpdate={handleLocationUpdate}
+              editingLocation={editingLocation}
+              onCancel={cancelEdit}
+              isLoading={isSubmitting}
+            />
+          ) : (
+            <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <Card>
                 <CardHeader className="pb-2">
@@ -214,19 +265,14 @@ export default function Admin() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => {
-                                  alert(`Ubicación: ${location.name}\nDirección: ${location.address}\nCategoría: ${location.category}\nDescripción: ${location.description}`);
-                                }}
+                                onClick={() => openModal(location)}
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => {
-                                  // Simple edit for now - just updates the timestamp
-                                  handleLocationEdit(location.id, { ...location });
-                                }}
+                                onClick={() => startEdit(location)}
                               >
                                 <Edit className="h-4 w-4" />
                               </Button>
@@ -250,8 +296,15 @@ export default function Admin() {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+            </>
+            )}
+        </div>
+
+        <DetailModal
+          location={selectedLocation}
+          isOpen={isModalOpen}
+          onClose={closeModal}
+        />
       </div>
     </div>
   );

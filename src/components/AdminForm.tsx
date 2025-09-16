@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -33,12 +34,17 @@ const locationSchema = z.object({
 type LocationFormData = z.infer<typeof locationSchema>;
 
 interface AdminFormProps {
-  onLocationAdd: (location: Omit<Location, 'id'>) => void;
+  onLocationAdd: (location: Omit<Location, 'id'>) => Promise<void>;
+  onLocationUpdate?: (id: string, updates: Partial<Location>) => Promise<void>;
+  editingLocation?: Location | null;
+  onCancel?: () => void;
+  isLoading?: boolean;
 }
 
-export function AdminForm({ onLocationAdd }: AdminFormProps) {
+export function AdminForm({ onLocationAdd, onLocationUpdate, editingLocation, onCancel, isLoading = false }: AdminFormProps) {
   const [newTag, setNewTag] = useState("");
   const { data: allLocations = [] } = useLocations();
+  const isEditing = !!editingLocation;
 
   const form = useForm<LocationFormData>({
     resolver: zodResolver(locationSchema),
@@ -54,6 +60,25 @@ export function AdminForm({ onLocationAdd }: AdminFormProps) {
       tags: [],
     },
   });
+
+  // Populate form when editing
+  React.useEffect(() => {
+    if (editingLocation) {
+      form.reset({
+        name: editingLocation.name,
+        description: editingLocation.description,
+        address: editingLocation.address,
+        photo: editingLocation.photo,
+        mapsUrl: editingLocation.mapsUrl,
+        category: editingLocation.category,
+        subcategory: editingLocation.subcategory || "",
+        coordinates: editingLocation.coordinates,
+        tags: editingLocation.tags,
+      });
+    } else {
+      form.reset();
+    }
+  }, [editingLocation, form]);
 
   const watchedCategory = form.watch("category");
   const watchedTags = form.watch("tags");
@@ -77,18 +102,27 @@ export function AdminForm({ onLocationAdd }: AdminFormProps) {
 
   const onSubmit = async (data: LocationFormData) => {
     try {
-      const newLocation: Omit<Location, 'id'> = {
-        ...data,
-        subcategory: data.subcategory || undefined,
-      };
+      if (isEditing && editingLocation && onLocationUpdate) {
+        // Update existing location
+        await onLocationUpdate(editingLocation.id, {
+          ...data,
+          subcategory: data.subcategory || undefined,
+        });
+        toast.success("¡Ubicación actualizada exitosamente!");
+      } else {
+        // Add new location
+        const newLocation: Omit<Location, 'id'> = {
+          ...data,
+          subcategory: data.subcategory || undefined,
+        };
 
-      await onLocationAdd(newLocation);
-
-      toast.success("¡Ubicación agregada exitosamente!");
-      form.reset();
+        await onLocationAdd(newLocation);
+        toast.success("¡Ubicación agregada exitosamente!");
+        form.reset();
+      }
     } catch (error) {
-      console.error("Error adding location:", error);
-      toast.error("Error al agregar la ubicación");
+      console.error("Error saving location:", error);
+      toast.error(isEditing ? "Error al actualizar la ubicación" : "Error al agregar la ubicación");
     }
   };
 
@@ -97,10 +131,13 @@ export function AdminForm({ onLocationAdd }: AdminFormProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MapPin className="h-6 w-6" />
-          Agregar Nueva Ubicación
+          {isEditing ? 'Editar Ubicación' : 'Agregar Nueva Ubicación'}
         </CardTitle>
         <CardDescription>
-          Complete el formulario para agregar una nueva ubicación al directorio de San Gil
+          {isEditing
+            ? 'Modifique los datos de la ubicación seleccionada'
+            : 'Complete el formulario para agregar una nueva ubicación al directorio de San Gil'
+          }
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -314,9 +351,23 @@ export function AdminForm({ onLocationAdd }: AdminFormProps) {
               )}
             </div>
 
-            <Button type="submit" className="w-full">
-              Agregar Ubicación
-            </Button>
+            <div className="flex gap-2">
+              {isEditing && onCancel && (
+                <Button type="button" variant="outline" onClick={onCancel} className="flex-1" disabled={isLoading}>
+                  Cancelar
+                </Button>
+              )}
+              <Button type="submit" className="flex-1" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    {isEditing ? 'Actualizando...' : 'Agregando...'}
+                  </>
+                ) : (
+                  isEditing ? 'Actualizar Ubicación' : 'Agregar Ubicación'
+                )}
+              </Button>
+            </div>
           </form>
         </Form>
       </CardContent>
