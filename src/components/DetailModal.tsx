@@ -1,8 +1,10 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, ExternalLink } from "lucide-react";
+import { MapPin, ExternalLink, Image as ImageIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 import type { Location } from '@/types';
+import { isFirebaseStorageUrl } from '@/services/storage.service';
 
 interface DetailModalProps {
   location: Location | null;
@@ -10,7 +12,7 @@ interface DetailModalProps {
   onClose: () => void;
 }
 
-// Import images
+// Import images for backward compatibility
 import restaurantJenny from "@/assets/restaurant-jenny.jpg";
 import cuevaDelIndio from "@/assets/cueva-del-indio.jpg";
 import paragliding from "@/assets/paragliding.jpg";
@@ -24,9 +26,43 @@ const imageMap: Record<string, string> = {
 };
 
 export function DetailModal({ location, isOpen, onClose }: DetailModalProps) {
+  const [imageError, setImageError] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  // Reset image states when location changes
+  useEffect(() => {
+    setImageError(false);
+    setImageLoaded(false);
+  }, [location]);
+
   if (!location) return null;
 
-  const imageSrc = imageMap[location.photo] || restaurantJenny;
+  // Determine the image source
+  const getImageSrc = (): string => {
+    // If it's a Firebase Storage URL, use it directly
+    if (isFirebaseStorageUrl(location.photo)) {
+      return location.photo;
+    }
+
+    // Otherwise, try to use the image mapping for backward compatibility
+    return imageMap[location.photo] || restaurantJenny;
+  };
+
+  const imageSrc = getImageSrc();
+
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+    setImageError(false);
+  };
+
+  const handleRetry = () => {
+    setImageError(false);
+    setImageLoaded(false);
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -37,13 +73,37 @@ export function DetailModal({ location, isOpen, onClose }: DetailModalProps) {
         
         <div className="space-y-6">
           {/* Hero Image */}
-          <div className="relative h-64 rounded-lg overflow-hidden">
-            <img 
-              src={imageSrc}
-              alt={location.name}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+          <div className="relative h-64 rounded-lg overflow-hidden bg-muted">
+            {!imageLoaded && !imageError && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            )}
+
+            {imageError ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
+                <ImageIcon className="h-12 w-12 text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground mb-3">
+                  No se pudo cargar la imagen
+                </p>
+                <Button size="sm" variant="outline" onClick={handleRetry}>
+                  Reintentar
+                </Button>
+              </div>
+            ) : (
+              <>
+                <img
+                  src={imageSrc}
+                  alt={location.name}
+                  className={`w-full h-full object-cover transition-opacity duration-300 ${
+                    imageLoaded ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  onError={handleImageError}
+                  onLoad={handleImageLoad}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+              </>
+            )}
           </div>
           
           {/* Tags */}

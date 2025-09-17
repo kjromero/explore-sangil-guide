@@ -11,6 +11,7 @@ import {
 import type { DocumentSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import type { Location } from "@/types";
+import { deleteLocationImage, cleanupOldImage } from "@/services/storage.service";
 
 const LOCATIONS_COLLECTION = "locations";
 
@@ -100,6 +101,16 @@ export class LocationsService {
   static async updateLocation(id: string, updates: Partial<Location>): Promise<Location> {
     try {
       const docRef = doc(db, LOCATIONS_COLLECTION, id);
+
+      // Get current location for cleanup if photo is being updated
+      const currentDoc = await getDoc(docRef);
+      const currentLocation = currentDoc.exists() ? firestoreToLocation(currentDoc) : null;
+
+      // Clean up old image if photo is being updated
+      if (currentLocation && updates.photo && updates.photo !== currentLocation.photo) {
+        await cleanupOldImage(currentLocation.photo, updates.photo);
+      }
+
       await updateDoc(docRef, {
         ...updates,
         updatedAt: Timestamp.now(),
@@ -117,6 +128,16 @@ export class LocationsService {
   static async deleteLocation(id: string): Promise<void> {
     try {
       const docRef = doc(db, LOCATIONS_COLLECTION, id);
+
+      // Get location to clean up associated image
+      const locationDoc = await getDoc(docRef);
+      if (locationDoc.exists()) {
+        const location = firestoreToLocation(locationDoc);
+
+        // Delete image from storage if it's a Firebase Storage URL
+        await deleteLocationImage(location.photo);
+      }
+
       await deleteDoc(docRef);
     } catch (error) {
       console.error("Error deleting location:", error);
