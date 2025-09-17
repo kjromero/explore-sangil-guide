@@ -5,7 +5,8 @@ export interface Location {
   address: string;
   photo: string;
   mapsUrl: string;
-  bookingUrl?: string;
+  wazeUrl: string;
+  customUrl?: string;
   tags: string[];
   category: string;
   subcategory?: string;

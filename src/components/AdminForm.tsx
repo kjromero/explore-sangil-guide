@@ -16,18 +16,29 @@ import { MapPin, Plus, X } from "lucide-react";
 import type { Location } from "@/types";
 import { useLocations } from "@/hooks/useLocations";
 
+// Helper functions to generate URLs from coordinates
+const generateMapsUrl = (coordinates: [number, number]): string => {
+  const [lat, lng] = coordinates;
+  return `https://maps.google.com/?q=${lat},${lng}`;
+};
+
+const generateWazeUrl = (coordinates: [number, number]): string => {
+  const [lat, lng] = coordinates;
+  return `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`;
+};
+
 // Zod schema for location validation
 const locationSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
   description: z.string().min(10, "La descripción debe tener al menos 10 caracteres"),
   address: z.string().min(5, "La dirección debe tener al menos 5 caracteres"),
   photo: z.string().min(1, "La foto es requerida"),
-  mapsUrl: z.string().url("Ingrese una URL válida de Google Maps"),
+  customUrl: z.string().url("Ingrese una URL válida").optional(),
   category: z.string().min(1, "La categoría es requerida"),
   subcategory: z.string().optional(),
   coordinates: z.tuple([z.number(), z.number()])
-    .refine(([lat, lng]) => lat >= -90 && lat <= 90, "La latitud debe estar entre -90 y 90")
-    .refine(([lat, lng]) => lng >= -180 && lng <= 180, "La longitud debe estar entre -180 y 180"),
+    .refine(([lat, _lng]) => lat >= -90 && lat <= 90, "La latitud debe estar entre -90 y 90")
+    .refine(([_lat, lng]) => lng >= -180 && lng <= 180, "La longitud debe estar entre -180 y 180"),
   tags: z.array(z.string()).min(1, "Debe agregar al menos una etiqueta"),
 });
 
@@ -53,7 +64,7 @@ export function AdminForm({ onLocationAdd, onLocationUpdate, editingLocation, on
       description: "",
       address: "",
       photo: "",
-      mapsUrl: "",
+      customUrl: "",
       category: "",
       subcategory: "",
       coordinates: [],
@@ -69,7 +80,7 @@ export function AdminForm({ onLocationAdd, onLocationUpdate, editingLocation, on
         description: editingLocation.description,
         address: editingLocation.address,
         photo: editingLocation.photo,
-        mapsUrl: editingLocation.mapsUrl,
+        customUrl: editingLocation.customUrl || "",
         category: editingLocation.category,
         subcategory: editingLocation.subcategory || "",
         coordinates: editingLocation.coordinates,
@@ -102,19 +113,18 @@ export function AdminForm({ onLocationAdd, onLocationUpdate, editingLocation, on
 
   const onSubmit = async (data: LocationFormData) => {
     try {
+      const locationData = {
+        ...data,
+        subcategory: data.subcategory || undefined,
+      };
+
       if (isEditing && editingLocation && onLocationUpdate) {
         // Update existing location
-        await onLocationUpdate(editingLocation.id, {
-          ...data,
-          subcategory: data.subcategory || undefined,
-        });
+        await onLocationUpdate(editingLocation.id, locationData);
         toast.success("¡Ubicación actualizada exitosamente!");
       } else {
         // Add new location
-        const newLocation: Omit<Location, 'id'> = {
-          ...data,
-          subcategory: data.subcategory || undefined,
-        };
+        const newLocation: Omit<Location, 'id'> = locationData;
 
         await onLocationAdd(newLocation);
         toast.success("¡Ubicación agregada exitosamente!");
@@ -303,16 +313,19 @@ export function AdminForm({ onLocationAdd, onLocationUpdate, editingLocation, on
 
               <FormField
                 control={form.control}
-                name="mapsUrl"
+                name="customUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>URL de Google Maps</FormLabel>
+                    <FormLabel>URL Personalizada (opcional)</FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="https://maps.google.com/?q=6.556,-73.133"
-                        {...field} 
+                      <Input
+                        placeholder="https://mi-sitio.com"
+                        {...field}
                       />
                     </FormControl>
+                    <FormDescription>
+                      Enlace a sitio web, reservas, o página de redes sociales
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

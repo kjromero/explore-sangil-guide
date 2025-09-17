@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, ExternalLink, Calendar } from "lucide-react";
+import { MapPin, ExternalLink } from "lucide-react";
 import type { Location } from '@/types';
 
 interface DetailModalProps {
@@ -71,42 +71,34 @@ export function DetailModal({ location, isOpen, onClose }: DetailModalProps) {
           
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3">
-            <Button 
-              variant="explore" 
+            <Button
+              variant="explore"
               onClick={() => window.open(location.mapsUrl, '_blank')}
               className="flex-1"
             >
               <MapPin className="h-4 w-4 mr-2" />
-              Get Directions
+              Abrir en Google Maps
             </Button>
-            
-            {location.bookingUrl && (
-              <Button 
-                variant="secondary"
-                onClick={() => window.open(location.bookingUrl, '_blank')}
-                className="flex-1"
-              >
-                <Calendar className="h-4 w-4 mr-2" />
-                Book Now
-              </Button>
-            )}
-            
-            <Button 
-              variant="outline"
-              onClick={() => {
-                if (navigator.share) {
-                  navigator.share({
-                    title: location.name,
-                    text: location.description,
-                    url: location.mapsUrl
-                  });
-                }
-              }}
+
+            <Button
+              variant="secondary"
+              onClick={() => window.open(location.wazeUrl, '_blank')}
               className="flex-1"
             >
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Share
+              <MapPin className="h-4 w-4 mr-2" />
+              Abrir en Waze
             </Button>
+
+            {location.customUrl && (
+              <Button
+                variant="outline"
+                onClick={() => window.open(location.customUrl, '_blank')}
+                className="flex-1"
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Enlace Personalizado
+              </Button>
+            )}
           </div>
         </div>
       </DialogContent>

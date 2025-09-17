@@ -14,6 +14,18 @@ import type { Location } from "@/types";
 
 const LOCATIONS_COLLECTION = "locations";
 
+// Helper function to generate Maps URL from coordinates
+export const generateMapsUrl = (coordinates: [number, number]): string => {
+  const [lat, lng] = coordinates;
+  return `https://maps.google.com/?q=${lat},${lng}`;
+};
+
+// Helper function to generate Waze URL from coordinates
+export const generateWazeUrl = (coordinates: [number, number]): string => {
+  const [lat, lng] = coordinates;
+  return `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`;
+};
+
 // Convert Location to Firestore document format
 const locationToFirestore = (location: Omit<Location, 'id'>) => ({
   ...location,
@@ -32,9 +44,10 @@ const firestoreToLocation = (doc: DocumentSnapshot): Location => {
     description: data.description,
     address: data.address,
     photo: data.photo,
-    mapsUrl: data.mapsUrl,
-    bookingUrl: data.bookingUrl,
-    tags: data.tags || [], 
+    mapsUrl: generateMapsUrl([data.latitude, data.longitude]),
+    wazeUrl: generateWazeUrl([data.latitude, data.longitude]),
+    customUrl: data.customUrl,
+    tags: data.tags || [],
     category: data.category,
     subcategory: data.subcategory,
     coordinates: [data.latitude, data.longitude],
