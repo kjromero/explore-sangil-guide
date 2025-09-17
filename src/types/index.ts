@@ -1,3 +1,11 @@
+export interface Category {
+  id: string;
+  name: string;
+  subcategories: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Location {
   id: string;
   name: string;

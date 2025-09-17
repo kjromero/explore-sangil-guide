@@ -1,5 +1,53 @@
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "./firebase";
+
+// Clear all documents from a collection
+async function clearCollection(collectionName: string) {
+  try {
+    const querySnapshot = await getDocs(collection(db, collectionName));
+    const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
+    await Promise.all(deletePromises);
+    console.log(`✅ Cleared ${collectionName} collection (${querySnapshot.size} documents)`);
+  } catch (error) {
+    console.error(`Error clearing ${collectionName} collection:`, error);
+    throw error;
+  }
+}
+
+// Clear all collections before seeding
+async function clearAllCollections() {
+  console.log("🗑️  Clearing all collections...");
+
+  try {
+    await clearCollection("categories");
+    await clearCollection("locations");
+    await clearCollection("products");
+
+    console.log("✅ All collections cleared successfully");
+  } catch (error) {
+    console.error("Error clearing collections:", error);
+    throw error;
+  }
+}
+
+// Function to ask for confirmation before clearing data
+async function confirmAndClear() {
+  console.log("⚠️  WARNING: This will delete all existing data in your Firebase database!");
+  console.log("Collections to be cleared:");
+  console.log("  - categories");
+  console.log("  - locations");
+  console.log("  - products");
+  console.log("");
+
+  // For Node.js environment, we'll proceed with a clear warning
+  // In a browser environment, you might want to use window.confirm()
+  console.log("🔄 Proceeding with clearing in 5 seconds... (Ctrl+C to cancel)");
+
+  // Give user time to cancel
+  await new Promise(resolve => setTimeout(resolve, 5000));
+
+  return clearAllCollections();
+}
 
 const categoriesData = [
   {
@@ -175,8 +223,8 @@ const locationsData = [
     wazeUrl: "https://waze.com/ul?ll=6.556,-73.133&navigate=yes",
     customUrl: "https://reservations.mock/jenny",
     tags: ["familiar", "comida local", "tradicional"],
-    category: "gastronomía",
-    subcategory: "Restaurantes",
+    category: "comidas",
+    subcategory: "Lunch",
     coordinates: [6.556, -73.133],
   },
   {
@@ -189,7 +237,7 @@ const locationsData = [
     mapsUrl: "https://maps.google.com/?q=6.558,-73.135",
     wazeUrl: "https://waze.com/ul?ll=6.558,-73.135&navigate=yes",
     tags: ["café", "pasteles", "relajante"],
-    category: "gastronomía",
+    category: "comidas",
     subcategory: "Cafés",
     coordinates: [6.558, -73.135],
   },
@@ -203,8 +251,8 @@ const locationsData = [
     mapsUrl: "https://maps.google.com/?q=6.559,-73.140",
     wazeUrl: "https://waze.com/ul?ll=6.559,-73.140&navigate=yes",
     tags: ["patrimonio", "visitas guiadas", "naturaleza"],
-    category: "cultura",
-    subcategory: "Sitios Históricos",
+    category: "cultural",
+    subcategory: "Calles con historia",
     coordinates: [6.559, -73.14],
   },
   {
@@ -217,8 +265,8 @@ const locationsData = [
     mapsUrl: "https://maps.google.com/?q=6.554,-73.134",
     wazeUrl: "https://waze.com/ul?ll=6.554,-73.134&navigate=yes",
     tags: ["colonial", "arquitectura", "religioso"],
-    category: "cultura",
-    subcategory: "Sitios Históricos",
+    category: "cultural",
+    subcategory: "Catedrales",
     coordinates: [6.554, -73.134],
   },
   {
@@ -233,7 +281,7 @@ const locationsData = [
     customUrl: "https://adventure.mock/paragliding",
     tags: ["adrenalina", "adultos", "vistas panorámicas"],
     category: "aventura",
-    subcategory: "Deportes Extremos",
+    subcategory: "Actividades extremas",
     coordinates: [6.56, -73.135],
   },
   {
@@ -248,7 +296,7 @@ const locationsData = [
     customUrl: "https://adventure.mock/rafting",
     tags: ["deportes acuáticos", "adrenalina", "grupos"],
     category: "aventura",
-    subcategory: "Deportes Extremos",
+    subcategory: "Actividades extremas",
     coordinates: [6.545, -73.12],
   },
   {
@@ -261,8 +309,8 @@ const locationsData = [
     mapsUrl: "https://maps.google.com/?q=6.553,-73.137",
     wazeUrl: "https://waze.com/ul?ll=6.553,-73.137&navigate=yes",
     tags: ["servicios", "electrónica", "reparación"],
-    category: "tiendas",
-    subcategory: "Servicios",
+    category: "emprendedores",
+    subcategory: "Tiendas locales destacadas",
     coordinates: [6.553, -73.137],
   },
   {
@@ -276,8 +324,8 @@ const locationsData = [
     wazeUrl: "https://waze.com/ul?ll=6.555,-73.132&navigate=yes",
     customUrl: "https://artesanias-sangil.mock",
     tags: ["artesanías", "souvenirs", "arte local"],
-    category: "tiendas",
-    subcategory: "Artesanías",
+    category: "artesanias",
+    subcategory: "",
     coordinates: [6.555, -73.132],
   },
 ];
@@ -354,6 +402,10 @@ async function main() {
   console.log("Starting Firebase data seeding...");
 
   try {
+    // Clear all collections first with confirmation
+    await confirmAndClear();
+
+    // Seed fresh data
     await seedCategories();
     await seedLocations();
     await seedProducts();

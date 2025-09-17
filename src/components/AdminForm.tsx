@@ -14,18 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { MapPin, Plus, X } from "lucide-react";
 import type { Location } from "@/types";
-import { useLocations } from "@/hooks/useLocations";
-
-// Helper functions to generate URLs from coordinates
-const generateMapsUrl = (coordinates: [number, number]): string => {
-  const [lat, lng] = coordinates;
-  return `https://maps.google.com/?q=${lat},${lng}`;
-};
-
-const generateWazeUrl = (coordinates: [number, number]): string => {
-  const [lat, lng] = coordinates;
-  return `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`;
-};
+import { useCategories } from "@/hooks/useCategories";
 
 // Zod schema for location validation
 const locationSchema = z.object({
@@ -54,7 +43,7 @@ interface AdminFormProps {
 
 export function AdminForm({ onLocationAdd, onLocationUpdate, editingLocation, onCancel, isLoading = false }: AdminFormProps) {
   const [newTag, setNewTag] = useState("");
-  const { data: allLocations = [] } = useLocations();
+  const { data: categories = [] } = useCategories();
   const isEditing = !!editingLocation;
 
   const form = useForm<LocationFormData>({
@@ -94,11 +83,18 @@ export function AdminForm({ onLocationAdd, onLocationUpdate, editingLocation, on
   const watchedCategory = form.watch("category");
   const watchedTags = form.watch("tags");
 
-  const existingCategories = useMemo(() => [...new Set(allLocations.map(l => l.category))], [allLocations]);
+  // Get categories from Firebase
+  const existingCategories = useMemo(() => {
+    return categories.map(cat => cat.id);
+  }, [categories]);
+
   const subcategoriesForCategory = useMemo(() => {
     if (!watchedCategory) return [];
-    return [...new Set(allLocations.filter(l => l.category === watchedCategory).map(l => l.subcategory))];
-  }, [watchedCategory, allLocations]);
+
+    // Get subcategories from Firebase categories
+    const firebaseCategory = categories.find(cat => cat.id === watchedCategory);
+    return firebaseCategory ? firebaseCategory.subcategories : [];
+  }, [watchedCategory, categories]);
 
   const handleAddTag = () => {
     if (newTag.trim() && !watchedTags.includes(newTag.trim())) {
@@ -211,11 +207,29 @@ export function AdminForm({ onLocationAdd, onLocationUpdate, editingLocation, on
                   <FormItem>
                     <FormLabel>Categoría</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ej: gastronomía" {...field} list="categories-datalist" />
+                      <select
+                        {...field}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        onChange={(e) => {
+                          field.onChange(e.target.value);
+                          // Reset subcategory when category changes
+                          form.setValue("subcategory", "");
+                        }}
+                      >
+                        <option value="">Seleccionar categoría</option>
+                        {existingCategories.map(cat => {
+                          const category = categories.find(c => c.id === cat);
+                          return (
+                            <option key={cat} value={cat}>
+                              {category ? category.name : cat}
+                            </option>
+                          );
+                        })}
+                      </select>
                     </FormControl>
-                    <datalist id="categories-datalist">
-                      {existingCategories.map(cat => <option key={cat} value={cat} />)}
-                    </datalist>
+                    <FormDescription>
+                      Selecciona una categoría de la lista
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -227,12 +241,25 @@ export function AdminForm({ onLocationAdd, onLocationUpdate, editingLocation, on
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Subcategoría</FormLabel>
-                     <FormControl>
-                      <Input placeholder="Ej: Restaurantes" {...field} list="subcategories-datalist" />
+                    <FormControl>
+                      <select
+                        {...field}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        disabled={!watchedCategory}
+                      >
+                        <option value="">
+                          {watchedCategory ? "Seleccionar subcategoría" : "Primero selecciona una categoría"}
+                        </option>
+                        {subcategoriesForCategory.map(sub => (
+                          <option key={sub} value={sub}>
+                            {sub}
+                          </option>
+                        ))}
+                      </select>
                     </FormControl>
-                    <datalist id="subcategories-datalist">
-                      {subcategoriesForCategory.map(sub => <option key={sub} value={sub} />)}
-                    </datalist>
+                    <FormDescription>
+                      Selecciona una subcategoría de la lista
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

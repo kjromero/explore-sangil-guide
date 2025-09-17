@@ -5,9 +5,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { UtensilsCrossed, Mountain, Landmark, ShoppingBag, Menu, ChevronDown } from "lucide-react";
-import { useLocations } from "@/hooks/useLocations";
-import type { Location } from "@/types";
+import { Folder, Menu, ChevronDown } from "lucide-react";
+import { useCategories } from "@/hooks/useCategories";
+import type { Category as CategoryType } from "@/types";
 
 // The Category type is now a flexible string
 export type Category = string;
@@ -20,26 +20,33 @@ interface FilterBarProps {
   onMenuToggle: () => void;
 }
 
-// This array still defines the primary categories and their icons for the UI
-const categories = [
+// This array defines the special UI categories ("Todo" is always first)
+const specialCategories = [
   { id: 'todo', label: 'Todo', icon: Menu },
-  { id: 'gastronomía', label: 'Gastronomía', icon: UtensilsCrossed },
-  { id: 'aventura', label: 'Aventura', icon: Mountain },
-  { id: 'cultura', label: 'Cultura', icon: Landmark },
-  { id: 'tiendas', label: 'Tiendas', icon: ShoppingBag },
 ];
 
-// Helper function to get subcategories dynamically from the data
-const getSubcategoriesFor = (category: Category, locations: Location[]): string[] => {
-  if (category === 'todo') return [];
-  const subcategories = locations
-    .filter(location => location.category === category)
-    .map(location => location.subcategory);
-  return [...new Set(subcategories)].filter(Boolean); // Return unique, non-empty subcategories
+// Helper function to get subcategories from Firebase categories
+const getSubcategoriesFor = (categoryId: string, categories: CategoryType[]): string[] => {
+  if (categoryId === 'todo') return [];
+
+  // Get subcategories from Firebase categories
+  const firebaseCategory = categories.find(cat => cat.id === categoryId);
+  return firebaseCategory ? firebaseCategory.subcategories : [];
 };
 
 export function FilterBar({ activeCategory, activeSubcategory, onCategoryChange, onSubcategoryChange, onMenuToggle }: FilterBarProps) {
-  const { data: locations = [] } = useLocations();
+  const { data: categories = [] } = useCategories();
+
+  // Combine special categories with Firebase categories
+  const allCategories = [
+    ...specialCategories,
+    ...categories.map(category => ({
+      id: category.id,
+      label: category.name,
+      icon: Folder, // Generic icon for all categories
+    }))
+  ];
+
   const handleCategoryClick = (category: Category) => {
     if (activeCategory === category) {
       onCategoryChange('todo');
@@ -54,9 +61,9 @@ export function FilterBar({ activeCategory, activeSubcategory, onCategoryChange,
     onSubcategoryChange(subcategory);
   };
 
-  const renderCategory = (category: typeof categories[0], isMobile = false) => {
+  const renderCategory = (category: typeof allCategories[0], isMobile = false) => {
     const Icon = category.icon;
-    const subcategories = getSubcategoriesFor(category.id, locations);
+    const subcategories = getSubcategoriesFor(category.id, categories);
     const hasSubs = subcategories.length > 0;
     const isActive = activeCategory === category.id;
 
@@ -119,7 +126,7 @@ export function FilterBar({ activeCategory, activeSubcategory, onCategoryChange,
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b shadow-elegant">
-      <div className="container mx-auto px-4 py-3">
+      <div className="mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-1">            
             <h2 className="text-lg font-semibold text-foreground">
@@ -128,14 +135,14 @@ export function FilterBar({ activeCategory, activeSubcategory, onCategoryChange,
           </div>
           
           {/* Desktop Categories */}
-          <div className="hidden md:flex items-center space-x-2">
-            {categories.map(category => renderCategory(category, false))}
+          <div className="hidden md:flex flex items-center space-x-2 overflow-x-auto pb-2 ml-[100px]">
+            {allCategories.map(category => renderCategory(category, false))}
           </div>
         </div>
         
         {/* Mobile Categories */}
         <div className="md:hidden mt-3 flex gap-2 overflow-x-auto pb-2">
-          {categories.map(category => renderCategory(category, true))}
+          {allCategories.map(category => renderCategory(category, true))}
         </div>
       </div>
     </div>
