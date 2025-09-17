@@ -177,10 +177,10 @@ export default function Admin() {
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">Gestión de Ubicaciones</h2>
             <Button
-              onClick={() => setShowForm(!showForm)}
+              onClick={() => showForm ? cancelEdit() : setShowForm(true)}
               className="flex items-center gap-2"
             >
-              <Plus className="h-4 w-4" />
+              {!showForm && <Plus className="h-4 w-4" />}
               {showForm ? 'Cancelar' : 'Agregar Ubicación'}
             </Button>
           </div>
