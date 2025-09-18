@@ -1,4 +1,4 @@
-import { collection, addDoc, serverTimestamp, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, getDocs, deleteDoc, doc, setDoc } from "firebase/firestore";
 import { db } from "./firebase";
 
 // Clear all documents from a collection
@@ -52,49 +52,148 @@ async function confirmAndClear() {
 const categoriesData = [
   {
     id: "comidas",
+    slug: "comidas",
     name: "Comidas",
     subcategories: [
-      "Lunch",
-      "Cafés",
-      "Comidas rápidas",
-      "Panaderías",
-      "Postres y Heladerías",
-      "Gastro Bar & Bar",
-      "Dinner",
+      {
+        id: "lunch",
+        name: "Lunch",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "cafes",
+        name: "Cafés",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "comidas-rapidas",
+        name: "Comidas rápidas",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "panaderias",
+        name: "Panaderías",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "postres-heladerias",
+        name: "Postres y Heladerías",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "gastro-bar",
+        name: "Gastro Bar & Bar",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "dinner",
+        name: "Dinner",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
     ],
     createdAt: "2025-09-16T00:00:00.000Z",
     updatedAt: "2025-09-16T00:00:00.000Z",
   },
   {
     id: "hospedajes",
+    slug: "hospedajes",
     name: "Hospedajes",
-    subcategories: ["Hoteles", "Glamping"],
+    subcategories: [
+      {
+        id: "hoteles",
+        name: "Hoteles",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "glamping",
+        name: "Glamping",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+    ],
     createdAt: "2025-09-16T00:00:00.000Z",
     updatedAt: "2025-09-16T00:00:00.000Z",
   },
   {
     id: "aventura",
+    slug: "aventura",
     name: "Aventura",
-    subcategories: ["Actividades extremas", "Naturaleza", "Tours guiados"],
+    subcategories: [
+      {
+        id: "actividades-extremas",
+        name: "Actividades extremas",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "naturaleza",
+        name: "Naturaleza",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "tours-guiados",
+        name: "Tours guiados",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+    ],
     createdAt: "2025-09-16T00:00:00.000Z",
     updatedAt: "2025-09-16T00:00:00.000Z",
   },
   {
     id: "market",
+    slug: "market",
     name: "Market",
-    subcategories: ["Supermercados"],
+    subcategories: [
+      {
+        id: "supermercados",
+        name: "Supermercados",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+    ],
     createdAt: "2025-09-16T00:00:00.000Z",
     updatedAt: "2025-09-16T00:00:00.000Z",
   },
   {
     id: "shops",
+    slug: "shops",
     name: "Shops",
-    subcategories: ["Fitness", "Todo a $5.000", "Tendero / Tiendas de barrio"],
+    subcategories: [
+      {
+        id: "fitness",
+        name: "Fitness",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "todo-a-5000",
+        name: "Todo a $5.000",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "tendero-tiendas",
+        name: "Tendero / Tiendas de barrio",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+    ],
     createdAt: "2025-09-16T00:00:00.000Z",
     updatedAt: "2025-09-16T00:00:00.000Z",
   },
   {
     id: "drogueria",
+    slug: "drogueria",
     name: "Droguería",
     subcategories: [],
     createdAt: "2025-09-16T00:00:00.000Z",
@@ -102,6 +201,7 @@ const categoriesData = [
   },
   {
     id: "recomendado-pet",
+    slug: "recomendado-pet",
     name: "Recomendado Pet",
     subcategories: [],
     createdAt: "2025-09-16T00:00:00.000Z",
@@ -109,6 +209,7 @@ const categoriesData = [
   },
   {
     id: "recomendado-kits",
+    slug: "recomendado-kits",
     name: "Recomendado Kits",
     subcategories: [],
     createdAt: "2025-09-16T00:00:00.000Z",
@@ -116,6 +217,7 @@ const categoriesData = [
   },
   {
     id: "artesanias",
+    slug: "artesanias",
     name: "Artesanías",
     subcategories: [],
     createdAt: "2025-09-16T00:00:00.000Z",
@@ -123,25 +225,73 @@ const categoriesData = [
   },
   {
     id: "mall",
+    slug: "mall",
     name: "Mall",
     subcategories: [
-      "Tiendas de ropa",
-      "Restaurantes",
-      "Entretenimiento (cine, bolera, juegos)",
-      "Servicios",
+      {
+        id: "tiendas-ropa",
+        name: "Tiendas de ropa",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "restaurantes",
+        name: "Restaurantes",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "entretenimiento",
+        name: "Entretenimiento (cine, bolera, juegos)",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "servicios",
+        name: "Servicios",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
     ],
     createdAt: "2025-09-16T00:00:00.000Z",
     updatedAt: "2025-09-16T00:00:00.000Z",
   },
   {
     id: "emergencias",
+    slug: "emergencias",
     name: "Emergencias",
-    subcategories: ["Policía", "Hospital", "Bomberos", "Ambulancia"],
+    subcategories: [
+      {
+        id: "policia",
+        name: "Policía",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "hospital",
+        name: "Hospital",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "bomberos",
+        name: "Bomberos",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "ambulancia",
+        name: "Ambulancia",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+    ],
     createdAt: "2025-09-16T00:00:00.000Z",
     updatedAt: "2025-09-16T00:00:00.000Z",
   },
   {
     id: "recomendado-del-mes",
+    slug: "recomendado-del-mes",
     name: "Recomendado del mes",
     subcategories: [],
     createdAt: "2025-09-16T00:00:00.000Z",
@@ -149,39 +299,117 @@ const categoriesData = [
   },
   {
     id: "cultural",
+    slug: "cultural",
     name: "Cultural",
     subcategories: [
-      "Rutas por hacer",
-      "Museos",
-      "Senderismo",
-      "Calles con historia",
-      "Parques",
-      "Catedrales",
+      {
+        id: "rutas-por-hacer",
+        name: "Rutas por hacer",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "museos",
+        name: "Museos",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "senderismo",
+        name: "Senderismo",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "calles-con-historia",
+        name: "Calles con historia",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "parques",
+        name: "Parques",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "catedrales",
+        name: "Catedrales",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
     ],
     createdAt: "2025-09-16T00:00:00.000Z",
     updatedAt: "2025-09-16T00:00:00.000Z",
   },
   {
     id: "vecinos",
+    slug: "vecinos",
     name: "Vecinos",
     subcategories: [
-      "Barichara",
-      "Socorro",
-      "Curití",
-      "Charalá",
-      "Valle de San José",
-      "Otros pueblos cercanos",
+      {
+        id: "barichara",
+        name: "Barichara",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "socorro",
+        name: "Socorro",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "curiti",
+        name: "Curití",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "charala",
+        name: "Charalá",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "valle-de-san-jose",
+        name: "Valle de San José",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "otros-pueblos",
+        name: "Otros pueblos cercanos",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
     ],
     createdAt: "2025-09-16T00:00:00.000Z",
     updatedAt: "2025-09-16T00:00:00.000Z",
   },
   {
     id: "emprendedores",
+    slug: "emprendedores",
     name: "Emprendedores",
     subcategories: [
-      "Tiendas locales destacadas",
-      "Productos únicos de la región",
-      "Startups / Nuevos negocios",
+      {
+        id: "tiendas-locales",
+        name: "Tiendas locales destacadas",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "productos-region",
+        name: "Productos únicos de la región",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
+      {
+        id: "startups-nuevos",
+        name: "Startups / Nuevos negocios",
+        createdAt: "2025-09-16T00:00:00.000Z",
+        updatedAt: "2025-09-16T00:00:00.000Z",
+      },
     ],
     createdAt: "2025-09-16T00:00:00.000Z",
     updatedAt: "2025-09-16T00:00:00.000Z",
@@ -190,18 +418,18 @@ const categoriesData = [
 
 export async function seedCategories() {
   try {
-    const categoriesCollection = collection(db, "categories");
-
     for (const category of categoriesData) {
-      const { id, ...categoryRest } = category;
+      const { id, slug, ...categoryRest } = category;
+      const categoryRef = doc(db, "categories", id);
 
-      await addDoc(categoriesCollection, {
+      await setDoc(categoryRef, {
         ...categoryRest,
+        slug,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
 
-      console.log(`Added category: ${category.name}`);
+      console.log(`Added category: ${category.name} with ID: ${id}`);
     }
 
     console.log("All categories uploaded successfully!");
@@ -224,7 +452,7 @@ const locationsData = [
     customUrl: "https://reservations.mock/jenny",
     tags: ["familiar", "comida local", "tradicional"],
     category: "comidas",
-    subcategory: "Lunch",
+    subcategory: "lunch",
     coordinates: [6.556, -73.133],
   },
   {
@@ -238,7 +466,7 @@ const locationsData = [
     wazeUrl: "https://waze.com/ul?ll=6.558,-73.135&navigate=yes",
     tags: ["café", "pasteles", "relajante"],
     category: "comidas",
-    subcategory: "Cafés",
+    subcategory: "cafes",
     coordinates: [6.558, -73.135],
   },
   {
@@ -252,7 +480,7 @@ const locationsData = [
     wazeUrl: "https://waze.com/ul?ll=6.559,-73.140&navigate=yes",
     tags: ["patrimonio", "visitas guiadas", "naturaleza"],
     category: "cultural",
-    subcategory: "Calles con historia",
+    subcategory: "calles-con-historia",
     coordinates: [6.559, -73.14],
   },
   {
@@ -266,7 +494,7 @@ const locationsData = [
     wazeUrl: "https://waze.com/ul?ll=6.554,-73.134&navigate=yes",
     tags: ["colonial", "arquitectura", "religioso"],
     category: "cultural",
-    subcategory: "Catedrales",
+    subcategory: "catedrales",
     coordinates: [6.554, -73.134],
   },
   {
@@ -281,7 +509,7 @@ const locationsData = [
     customUrl: "https://adventure.mock/paragliding",
     tags: ["adrenalina", "adultos", "vistas panorámicas"],
     category: "aventura",
-    subcategory: "Actividades extremas",
+    subcategory: "actividades-extremas",
     coordinates: [6.56, -73.135],
   },
   {
@@ -296,7 +524,7 @@ const locationsData = [
     customUrl: "https://adventure.mock/rafting",
     tags: ["deportes acuáticos", "adrenalina", "grupos"],
     category: "aventura",
-    subcategory: "Actividades extremas",
+    subcategory: "actividades-extremas",
     coordinates: [6.545, -73.12],
   },
   {
@@ -310,7 +538,7 @@ const locationsData = [
     wazeUrl: "https://waze.com/ul?ll=6.553,-73.137&navigate=yes",
     tags: ["servicios", "electrónica", "reparación"],
     category: "emprendedores",
-    subcategory: "Tiendas locales destacadas",
+    subcategory: "tiendas-locales",
     coordinates: [6.553, -73.137],
   },
   {
@@ -375,6 +603,59 @@ const productsData = [
     image: "tshirt-mockup.jpg",
     instagramUrl: "https:instagram.com/sangiltourism",
   },
+  {
+    id: "prod-3",
+    name: "Gorra San Gil Explorer",
+    description: "Gorra ajustable con logo bordado y diseño de aventura.",
+    price: "$20.000 COP",
+    image: "tshirt-mockup.jpg",
+    instagramUrl: "https:instagram.com/sangiltourism",
+  },
+  {
+    id: "prod-4",
+    name: "Mochila de Senderismo San Gil",
+    description:
+      "Mochila resistente al agua con múltiples compartimentos y diseño ergonómico.",
+    price: "$80.000 COP",
+    image: "tshirt-mockup.jpg",
+    instagramUrl: "https:instagram.com/sangiltourism",
+  },
+  {
+    id: "prod-5",
+    name: "Kit de Supervivencia para Aventureros",
+    description:
+      "Kit compacto con herramientas esenciales para actividades al aire libre.",
+    price: "$60.000 COP",
+    image: "tshirt-mockup.jpg",
+    instagramUrl: "https:instagram.com/sangiltourism",
+  },
+  {
+    id: "prod-6",
+    name: "Mapa Ilustrado de San Gil",
+    description:
+      "Mapa artístico con puntos de interés, rutas de senderismo y actividades destacadas.",
+    price: "$15.000 COP",
+    image: "tshirt-mockup.jpg",
+    instagramUrl: "https:instagram.com/sangiltourism",
+  },
+  {
+    id: "prod-7",
+    name: "Taza de Cerámica San Gil",
+    description:
+      "Taza de cerámica con diseño colorido que celebra la cultura y naturaleza de San Gil.",
+    price: "$18.000 COP",
+    image: "tshirt-mockup.jpg",
+    instagramUrl: "https:instagram.com/sangiltourism",
+  },
+  {
+    id: "prod-8",
+    name: "Póster Fotográfico de San Gil",
+    description:
+      "Póster de alta calidad con fotografía profesional del paisaje de San Gil.",
+    price: "$30.000 COP",
+    image: "tshirt-mockup.jpg",
+    instagramUrl: "https:instagram.com/sangiltourism",
+  }
 ];
 
 export async function seedProducts() {

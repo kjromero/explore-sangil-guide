@@ -4,7 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, ExternalLink, Image as ImageIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Location } from '@/types';
-import { isFirebaseStorageUrl } from '@/services/storage.service';
+import { CategoriesService } from '@/services/categories.service';
+import { useCategories } from '@/hooks/useCategories';
 
 interface DetailModalProps {
   location: Location | null;
@@ -12,22 +13,10 @@ interface DetailModalProps {
   onClose: () => void;
 }
 
-// Import images for backward compatibility
-import restaurantJenny from "@/assets/restaurant-jenny.jpg";
-import cuevaDelIndio from "@/assets/cueva-del-indio.jpg";
-import paragliding from "@/assets/paragliding.jpg";
-import phoneRepair from "@/assets/phone-repair.jpg";
-
-const imageMap: Record<string, string> = {
-  "restaurant-jenny.jpg": restaurantJenny,
-  "cueva-del-indio.jpg": cuevaDelIndio,
-  "paragliding.jpg": paragliding,
-  "phone-repair.jpg": phoneRepair,
-};
-
 export function DetailModal({ location, isOpen, onClose }: DetailModalProps) {
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const { data: categories = [] } = useCategories();
 
   // Reset image states when location changes
   useEffect(() => {
@@ -37,18 +26,9 @@ export function DetailModal({ location, isOpen, onClose }: DetailModalProps) {
 
   if (!location) return null;
 
-  // Determine the image source
-  const getImageSrc = (): string => {
-    // If it's a Firebase Storage URL, use it directly
-    if (isFirebaseStorageUrl(location.photo)) {
-      return location.photo;
-    }
-
-    // Otherwise, try to use the image mapping for backward compatibility
-    return imageMap[location.photo] || restaurantJenny;
-  };
-
-  const imageSrc = getImageSrc();
+  // Get category and subcategory names for display
+  const categoryName = CategoriesService.getCategoryNameById(categories, location.category);
+  const subcategoryName = CategoriesService.getSubcategoryNameById(categories, location.subcategory);
 
   const handleImageError = () => {
     setImageError(true);
@@ -93,7 +73,7 @@ export function DetailModal({ location, isOpen, onClose }: DetailModalProps) {
             ) : (
               <>
                 <img
-                  src={imageSrc}
+                  src={location.photo}
                   alt={location.name}
                   className={`w-full h-full object-cover transition-opacity duration-300 ${
                     imageLoaded ? 'opacity-100' : 'opacity-0'
@@ -109,8 +89,13 @@ export function DetailModal({ location, isOpen, onClose }: DetailModalProps) {
           {/* Tags */}
           <div className="flex flex-wrap gap-2">
             <Badge variant="secondary" className="capitalize">
-              {location.category}
+              {categoryName}
             </Badge>
+            {subcategoryName && (
+              <Badge variant="outline">
+                {subcategoryName}
+              </Badge>
+            )}
             {location.tags.map((tag) => (
               <Badge key={tag} variant="outline">
                 {tag}

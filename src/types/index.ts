@@ -1,9 +1,31 @@
-export interface Category {
+export interface Subcategory {
   id: string;
   name: string;
-  subcategories: string[];
+  description?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface Category {
+  id: string;
+  slug: string;
+  name: string;
+  subcategories: Subcategory[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CategoryOption {
+  id: string;
+  label: string;
+  value: string;
+}
+
+export interface SubcategoryOption {
+  id: string;
+  label: string;
+  value: string;
+  categoryId: string;
 }
 
 export interface Location {

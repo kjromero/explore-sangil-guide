@@ -14,7 +14,8 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { MapPin, Plus, X, Upload, Image as ImageIcon, Loader2 } from "lucide-react";
 import type { Location } from "@/types";
-import { useCategories } from "@/hooks/useCategories";
+import { useCategories, useSubcategoriesByCategory } from "@/hooks/useCategories";
+import { CategoriesService } from "@/services/categories.service";
 import { uploadLocationImage, validateImageFile } from "@/services/storage.service";
 
 // Zod schema for location validation
@@ -111,18 +112,13 @@ export function AdminForm({ onLocationAdd, onLocationUpdate, editingLocation, on
   const watchedCategory = form.watch("category");
   const watchedTags = form.watch("tags");
 
+  // Get subcategories for the selected category
+  const { data: subcategories = [] } = useSubcategoriesByCategory(watchedCategory);
+
   // Get categories from Firebase
   const existingCategories = useMemo(() => {
-    return categories.map(cat => cat.id);
+    return categories.map(cat => cat.slug);
   }, [categories]);
-
-  const subcategoriesForCategory = useMemo(() => {
-    if (!watchedCategory) return [];
-
-    // Get subcategories from Firebase categories
-    const firebaseCategory = categories.find(cat => cat.id === watchedCategory);
-    return firebaseCategory ? firebaseCategory.subcategories : [];
-  }, [watchedCategory, categories]);
 
   const handleAddTag = () => {
     if (newTag.trim() && !watchedTags.includes(newTag.trim())) {
@@ -340,7 +336,7 @@ export function AdminForm({ onLocationAdd, onLocationUpdate, editingLocation, on
                       >
                         <option value="">Seleccionar categoría</option>
                         {existingCategories.map(cat => {
-                          const category = categories.find(c => c.id === cat);
+                          const category = categories.find(c => c.slug === cat);
                           return (
                             <option key={cat} value={cat}>
                               {category ? category.name : cat}
@@ -372,9 +368,9 @@ export function AdminForm({ onLocationAdd, onLocationUpdate, editingLocation, on
                         <option value="">
                           {watchedCategory ? "Seleccionar subcategoría" : "Primero selecciona una categoría"}
                         </option>
-                        {subcategoriesForCategory.map(sub => (
-                          <option key={sub} value={sub}>
-                            {sub}
+                        {subcategories.map(sub => (
+                          <option key={sub.id} value={sub.id}>
+                            {sub.name}
                           </option>
                         ))}
                       </select>
@@ -399,8 +395,8 @@ export function AdminForm({ onLocationAdd, onLocationUpdate, editingLocation, on
                     <FormControl>
                       <Input 
                         type="number" 
-                        step="any"
-                        placeholder="6.554"
+                        step=".01"
+                        placeholder="6,554"
                         {...field}
                         onChange={(e) => {
                           field.onChange(parseFloat(e.target.value) || 0);
@@ -424,8 +420,8 @@ export function AdminForm({ onLocationAdd, onLocationUpdate, editingLocation, on
                     <FormControl>
                       <Input 
                         type="number" 
-                        step="any"
-                        placeholder="-73.134"
+                        step=".01"
+                        placeholder="-73,134"
                         {...field}
                         onChange={(e) => {
                           field.onChange(parseFloat(e.target.value) || 0);

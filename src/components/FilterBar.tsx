@@ -6,8 +6,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Folder, Menu, ChevronDown } from "lucide-react";
-import { useCategories } from "@/hooks/useCategories";
-import type { Category as CategoryType } from "@/types";
+import { useCategories, useSubcategoriesByCategory } from "@/hooks/useCategories";
 
 // The Category type is now a flexible string
 export type Category = string;
@@ -20,30 +19,26 @@ interface FilterBarProps {
   onMenuToggle: () => void;
 }
 
-// This array defines the special UI categories ("Todo" is always first)
+// This array defines a special UI category ("Todo" is always first)
 const specialCategories = [
   { id: 'todo', label: 'Todo', icon: Menu },
 ];
 
-// Helper function to get subcategories from Firebase categories
-const getSubcategoriesFor = (categoryId: string, categories: CategoryType[]): string[] => {
-  if (categoryId === 'todo') return [];
-
-  // Get subcategories from Firebase categories
-  const firebaseCategory = categories.find(cat => cat.id === categoryId);
-  return firebaseCategory ? firebaseCategory.subcategories : [];
-};
-
 export function FilterBar({ activeCategory, activeSubcategory, onCategoryChange, onSubcategoryChange, onMenuToggle }: FilterBarProps) {
   const { data: categories = [] } = useCategories();
 
-  // Combine special categories with Firebase categories
+  // Get subcategories for the active category
+  const { data: activeSubcategories = [] } = useSubcategoriesByCategory(
+    activeCategory === 'todo' ? '' : activeCategory
+  );
+
+  // Combine "Todo" category with Firebase categories
   const allCategories = [
     ...specialCategories,
     ...categories.map(category => ({
-      id: category.id,
+      id: category.slug,
       label: category.name,
-      icon: Folder, // Generic icon for all categories
+      icon: Folder,
     }))
   ];
 
@@ -58,12 +53,19 @@ export function FilterBar({ activeCategory, activeSubcategory, onCategoryChange,
   };
 
   const handleSubcategoryClick = (subcategory: string) => {
-    onSubcategoryChange(subcategory);
+    if (activeSubcategory === subcategory) {
+
+      onSubcategoryChange(null);
+    } else {
+      onSubcategoryChange(subcategory);
+    }
   };
 
   const renderCategory = (category: typeof allCategories[0], isMobile = false) => {
     const Icon = category.icon;
-    const subcategories = getSubcategoriesFor(category.id, categories);
+    // Use activeSubcategories if this is the active category, otherwise fetch from categories
+    const subcategories = activeCategory === category.id ? activeSubcategories :
+      categories.find(cat => cat.slug === category.id)?.subcategories || [];
     const hasSubs = subcategories.length > 0;
     const isActive = activeCategory === category.id;
 
@@ -102,20 +104,20 @@ export function FilterBar({ activeCategory, activeSubcategory, onCategoryChange,
               onClick={() => handleCategoryClick(category.id)}
               className={isActive && !activeSubcategory ? "bg-accent" : ""}
             >
-              Todo {category.label.toLowerCase()}
+              Todo en {category.label.toLowerCase()}
             </DropdownMenuItem>
             {subcategories.map((subcategory) => (
               <DropdownMenuItem
-                key={subcategory}
+                key={subcategory.id}
                 onClick={() => {
                   if (activeCategory !== category.id) {
                     onCategoryChange(category.id);
                   }
-                  handleSubcategoryClick(subcategory);
+                  handleSubcategoryClick(subcategory.id);
                 }}
-                className={isActive && activeSubcategory === subcategory ? "bg-accent" : ""}
+                className={isActive && activeSubcategory === subcategory.id ? "bg-accent" : ""}
               >
-                {subcategory}
+                {subcategory.name}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>

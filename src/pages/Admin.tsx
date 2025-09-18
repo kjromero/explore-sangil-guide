@@ -12,14 +12,26 @@ import { Settings, MapPin, Plus, Eye, Edit, Trash2, Download, Upload, LogOut, Ch
 import type { Location } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocations, useCreateLocation, useUpdateLocation, useDeleteLocation } from "@/hooks/useLocations";
+import { useCategories } from "@/hooks/useCategories";
+import { CategoriesService } from "@/services/categories.service";
 import { DetailModal } from "@/components/DetailModal";
 
 export default function Admin() {
   const { user, logout } = useAuth();
   const { data: allLocations = [], isLoading, error } = useLocations();
+  const { data: categories = [] } = useCategories();
   const createLocation = useCreateLocation();
   const updateLocation = useUpdateLocation();
   const deleteLocation = useDeleteLocation();
+
+  // Helper function to get category name by ID
+  const getCategoryName = (categoryId: string) => {
+    return CategoriesService.getCategoryNameById(categories, categoryId);
+  };
+
+  const getSubcategoryName = (categoryId: string, subcategoryId?: string) => {
+    return CategoriesService.getSubcategoryNameById(categories, subcategoryId);
+  };
 
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -102,10 +114,21 @@ export default function Admin() {
 
   const getCategoryIcon = (category: string) => {
     const icons: Record<string, string> = {
-      "gastronomía": "🍽️",
-      "aventura": "🏔️",
-      "cultura": "🏛️",
-      "tiendas": "🛍️",
+      'comidas': '🍽️',
+      'hospedajes': '🏨',
+      'aventura': '🏔️',
+      'cultural': '🏛️',
+      'market': '🛒',
+      'shops': '🛍️',
+      'drogueria': '💊',
+      'emergencias': '🚨',
+      'emprendedores': '🚀',
+      'artesanias': '🎨',
+      'mall': '🏬',
+      'recomendado-pet': '🐕',
+      'recomendado-kits': '📦',
+      'recomendado-del-mes': '⭐',
+      'vecinos': '🏘️',
     };
     return icons[category] || "📍";
   };
@@ -253,9 +276,9 @@ export default function Admin() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline">{location.category}</Badge>
+                            <Badge variant="outline">{getCategoryName(location.category)}</Badge>
                           </TableCell>
-                          <TableCell>{location.subcategory || "-"}</TableCell>
+                          <TableCell>{getSubcategoryName(location.category, location.subcategory) || "-"}</TableCell>
                           <TableCell className="max-w-xs truncate">{location.address}</TableCell>
                           <TableCell className="font-mono text-sm">
                             {location.coordinates[0].toFixed(3)}, {location.coordinates[1].toFixed(3)}

@@ -1,18 +1,14 @@
 import {
   collection,
   doc,
-  addDoc,
   getDoc,
   getDocs,
-  updateDoc,
-  deleteDoc,
-  Timestamp,
   query,
   orderBy
 } from "firebase/firestore";
 import type { DocumentSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import type { Category } from "@/types";
+import type { Category, Subcategory } from "@/types";
 
 const CATEGORIES_COLLECTION = "categories";
 
@@ -20,20 +16,21 @@ const CATEGORIES_COLLECTION = "categories";
 const firestoreToCategory = (doc: DocumentSnapshot): Category => {
   const data = doc.data();
   return {
-    id: doc.id,
+    id: data.slug,
+    slug: data.slug || doc.id,
     name: data.name,
-    subcategories: data.subcategories || [],
+    subcategories: (data.subcategories || []).map((sub: Subcategory) => ({
+      id: sub.id,
+      name: sub.name,
+      description: sub.description || '',
+      createdAt: sub.createdAt,
+      updatedAt: sub.updatedAt,
+    })),
     createdAt: data.createdAt?.toDate()?.toISOString() || new Date().toISOString(),
     updatedAt: data.updatedAt?.toDate()?.toISOString() || new Date().toISOString(),
   };
 };
 
-// Convert Category to Firestore document format
-const categoryToFirestore = (category: Omit<Category, 'id'>) => ({
-  ...category,
-  createdAt: Timestamp.now(),
-  updatedAt: Timestamp.now(),
-});
 
 export class CategoriesService {
   // Get all categories
@@ -64,89 +61,37 @@ export class CategoriesService {
     }
   }
 
-  // Create new category
-  static async createCategory(category: Omit<Category, 'id'>): Promise<Category> {
-    try {
-      const docRef = await addDoc(collection(db, CATEGORIES_COLLECTION), categoryToFirestore(category));
-      return {
-        id: docRef.id,
-        ...category,
-      };
-    } catch (error) {
-      console.error("Error creating category:", error);
-      throw error;
-    }
-  }
-
-  // Update category
-  static async updateCategory(id: string, updates: Partial<Category>): Promise<Category> {
-    try {
-      const docRef = doc(db, CATEGORIES_COLLECTION, id);
-      await updateDoc(docRef, {
-        ...updates,
-        updatedAt: Timestamp.now(),
-      });
-
-      const updatedDoc = await getDoc(docRef);
-      return firestoreToCategory(updatedDoc);
-    } catch (error) {
-      console.error("Error updating category:", error);
-      throw error;
-    }
-  }
-
-  // Delete category
-  static async deleteCategory(id: string): Promise<void> {
-    try {
-      const docRef = doc(db, CATEGORIES_COLLECTION, id);
-      await deleteDoc(docRef);
-    } catch (error) {
-      console.error("Error deleting category:", error);
-      throw error;
-    }
-  }
-
-  // Add subcategory to a category
-  static async addSubcategory(categoryId: string, subcategory: string): Promise<Category> {
+  // Get subcategories by category ID
+  static async getSubcategoriesByCategory(categoryId: string): Promise<Subcategory[]> {
     try {
       const category = await this.getCategoryById(categoryId);
       if (!category) {
-        throw new Error("Category not found");
+        return [];
       }
-
-      const updatedSubcategories = [...category.subcategories, subcategory];
-      return await this.updateCategory(categoryId, { subcategories: updatedSubcategories });
+      return category.subcategories;
     } catch (error) {
-      console.error("Error adding subcategory:", error);
+      console.error("Error fetching subcategories by category:", error);
       throw error;
     }
   }
 
-  // Remove subcategory from a category
-  static async removeSubcategory(categoryId: string, subcategory: string): Promise<Category> {
-    try {
-      const category = await this.getCategoryById(categoryId);
-      if (!category) {
-        throw new Error("Category not found");
-      }
-
-      const updatedSubcategories = category.subcategories.filter(sub => sub !== subcategory);
-      return await this.updateCategory(categoryId, { subcategories: updatedSubcategories });
-    } catch (error) {
-      console.error("Error removing subcategory:", error);
-      throw error;
-    }
+  // Get category name by ID (utility for display)
+  static getCategoryNameById(categories: Category[], categoryId: string): string {
+    const category = categories.find(cat => cat.slug === categoryId);
+    return category ? category.name : categoryId;
   }
 
-  // Get all subcategories across all categories
-  static async getAllSubcategories(): Promise<string[]> {
-    try {
-      const categories = await this.getAllCategories();
-      const allSubcategories = categories.flatMap(category => category.subcategories);
-      return [...new Set(allSubcategories)].sort();
-    } catch (error) {
-      console.error("Error fetching all subcategories:", error);
-      throw error;
+  // Get subcategory name by ID (utility for display)
+  static getSubcategoryNameById(categories: Category[], subcategoryId?: string): string {
+    if (!subcategoryId) return "";
+
+    for (const category of categories) {
+      const subcategory = category.subcategories.find(sub => sub.id === subcategoryId);
+      if (subcategory) {
+        return subcategory.name;
+      }
     }
+
+    return subcategoryId; // Fallback to ID if not found
   }
 }
