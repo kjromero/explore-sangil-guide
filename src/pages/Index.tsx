@@ -7,7 +7,7 @@ import { ShopSection } from '@/components/ShopSection';
 import type { Location } from '@/types';
 
 const Index = () => {
-  const [showWelcome, setShowWelcome] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(true);
   const [activeCategory, setActiveCategory] = useState<Category>('todo');
   const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
