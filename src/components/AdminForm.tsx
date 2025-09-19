@@ -221,7 +221,7 @@ export function AdminForm({ onLocationAdd, onLocationUpdate, editingLocation, on
       const locationData = {
         ...data,
         photo: finalPhotoUrl,
-        subcategory: data.subcategory || undefined,
+        subcategory: data.subcategory ? data.subcategory : "",
       };
 
       if (isEditing && editingLocation && onLocationUpdate) {
