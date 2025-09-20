@@ -231,7 +231,7 @@ export function FilterBar({ activeCategory, activeSubcategory, onCategoryChange,
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-1">
               <h2 className="text-lg font-semibold text-foreground">
-                Explorador San Gil
+                SIENTE Y VIVE - SAN GIL
               </h2>
             </div>
 

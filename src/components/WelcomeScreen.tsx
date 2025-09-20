@@ -21,9 +21,9 @@ export function WelcomeScreen({ onExplore }: WelcomeScreenProps) {
       <div className="relative z-10 min-h-screen flex items-center justify-center px-4">
         <div className="text-center max-w-4xl mx-auto animate-fade-in">
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-            Descubre
+            SIENTE Y VIVE
             <span className="block bg-gradient-sunset bg-clip-text text-transparent">
-              San Gil
+              SAN GIL 
             </span>
           </h1>
           
