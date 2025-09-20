@@ -104,7 +104,7 @@ export function DetailModal({ location, isOpen, onClose }: DetailModalProps) {
           </div>
           
           {/* Description */}
-          <p className="text-muted-foreground leading-relaxed">
+          <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
             {location.description}
           </p>
           
